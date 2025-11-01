@@ -152,6 +152,6 @@ Jini/.env.*
 .DS_Store
 .DS_Store.*
 **/.DS_Store
-*/.DB_Store
-Jini/.DB_Store
-Jini/src/.DB_Store
+*/.DS_Store
+Jini/.DS_Store
+Jini/src/.DS_Store
