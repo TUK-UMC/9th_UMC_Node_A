@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "🍒 UMC 공통 미션 API",
+    "description": "가게, 리뷰, 미션 관리 API 컬렉션",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1️⃣ User",
+      "item": [
+        {
+          "name": "회원가입 (비밀번호 해싱)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"name\": \"테스트유저\",\n  \"password\": \"testPassword123!\",\n  \"gender\": \"M\",\n  \"birth\": \"1995-05-15\",\n  \"address\": \"서울시 강남구\",\n  \"detailAddress\": \"101동 1001호\",\n  \"phoneNumber\": \"010-1234-5678\",\n  \"preferences\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/users/signup",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "users", "signup"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2️⃣ Store (가게)",
+      "item": [
+        {
+          "name": "가게 추가",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"맛있는 한식당\",\n  \"regionName\": \"강남구\",\n  \"address\": \"서울시 강남구 테헤란로 123\",\n  \"description\": \"정통 한식을 맛볼 수 있는 곳\",\n  \"status\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/stores",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "stores"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3️⃣ Review (리뷰)",
+      "item": [
+        {
+          "name": "가게에 리뷰 추가",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"rating\": 4.5,\n  \"content\": \"음식이 정말 맛있었어요! 재방문 의사 100%\",\n  \"imageUrls\": [\n    \"https://example.com/image1.jpg\",\n    \"https://example.com/image2.jpg\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/stores/:storeId/reviews",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "stores", ":storeId", "reviews"],
+              "variable": [
+                {
+                  "key": "storeId",
+                  "value": "1",
+                  "description": "가게 ID"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4️⃣ Mission (미션)",
+      "item": [
+        {
+          "name": "가게에 미션 추가",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"title\": \"리뷰 5개 작성하기\",\n  \"description\": \"이 가게에 리뷰를 5개 작성하면 1000 포인트를 드립니다!\",\n  \"rewardPoint\": 1000,\n  \"status\": \"waiting\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/stores/:storeId/missions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "stores", ":storeId", "missions"],
+              "variable": [
+                {
+                  "key": "storeId",
+                  "value": "1",
+                  "description": "가게 ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "미션 도전하기",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/missions/:missionId/challenge",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "missions", ":missionId", "challenge"],
+              "variable": [
+                {
+                  "key": "missionId",
+                  "value": "1",
+                  "description": "미션 ID"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
