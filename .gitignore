@@ -140,3 +140,18 @@ vite.config.ts.timestamp-*
 
 # IDE file
 .idea
+
+# dependency directories
+Jini/node_modules/
+
+# dotenv environment variable files
+Jini/.env
+Jini/.env.*
+
+# Mac Desktop Services Store
+.DS_Store
+.DS_Store.*
+**/.DS_Store
+*/.DB_Store
+Jini/.DB_Store
+Jini/src/.DB_Store
