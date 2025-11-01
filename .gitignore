@@ -77,7 +77,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
+Jini/.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -157,3 +157,5 @@ Jini/.env.*
 .DS_Store
 .DS_Store.*
 **/.DS_Store
+*/.DB_Store
+Jini/.DB_Store

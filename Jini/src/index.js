@@ -23,10 +23,6 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-// ============================================
-// 🍒 공통 미션 API
-// ============================================
-
 // 1-1. 특정 지역에 가게 추가하기 API
 app.post("/api/v1/stores", handleCreateStore);
 
@@ -39,9 +35,6 @@ app.post("/api/v1/stores/:storeId/missions", handleCreateMission);
 // 1-4. 가게의 미션을 도전 중인 미션에 추가하기 API (미션 도전하기)
 app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
 
-// ============================================
-// 👤 사용자 관련 API (기존)
-// ============================================
 app.post("/api/v1/users/signup", handleUserSignUp);
 
 app.listen(port, () => {
