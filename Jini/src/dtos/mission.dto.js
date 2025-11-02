@@ -4,11 +4,9 @@
 export const bodyToMission = (body, storeId) => {
     return {
         storeId,
-        userId: null, // 미션 생성 시에는 userId가 없음
         rewardPoint: body.rewardPoint || body.reward_point || 0,
         title: body.title,
         description: body.description || "",
-        status: "waiting", // 생성 시 기본 상태
         bossCode: body.bossCode || body.boss_code || null,
     };
 };
@@ -27,13 +25,28 @@ export const missionToResponse = (mission) => {
     return {
         missionId: mission.mission_id,
         storeId: mission.store_id,
-        userId: mission.user_id,
         rewardPoint: mission.reward_point,
         title: mission.title,
         description: mission.description,
-        status: mission.status,
         bossCode: mission.boss_code,
         createdAt: mission.created_at,
         updatedAt: mission.updated_at,
+    };
+};
+
+// UserMission을 포함한 응답 DTO로 변환
+export const userMissionToResponse = (userMission, mission) => {
+    return {
+        userMissionId: userMission.id,
+        missionId: mission.mission_id,
+        storeId: mission.store_id,
+        userId: userMission.user_id,
+        rewardPoint: mission.reward_point,
+        title: mission.title,
+        description: mission.description,
+        bossCode: mission.boss_code,
+        status: userMission.status,
+        challengedAt: userMission.challenged_at,
+        completedAt: userMission.completed_at,
     };
 };
