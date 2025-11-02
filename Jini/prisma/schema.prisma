@@ -14,14 +14,117 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique(map: "email") @db.VarChar(255)
-  name          String   @db.VarChar(100)
-  gender        String   @db.VarChar(15)
-  birth         DateTime @db.Date
-  address       String   @db.VarChar(255)
-  detailAddress String?  @map("detail_address") @db.VarChar(255)
-  phoneNumber   String   @map("phone_number") @db.VarChar(15)
+  userId           Int                 @id @default(autoincrement()) @map("user_id")
+  email            String              @unique @db.VarChar(255)
+  name             String              @db.VarChar(100)
+  gender           String              @db.VarChar(15)
+  birth            DateTime            @db.Date
+  address          String              @db.VarChar(255)
+  detailAddress    String?             @map("detail_address") @db.VarChar(255)
+  phoneNumber      String              @map("phone_number") @db.VarChar(15)
+  password         String?             @db.VarChar(255)
+  socialProvider   String?             @map("social_provider") @db.VarChar(50)
+  socialId         String?             @map("social_id") @db.VarChar(255)
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  
+  reviews          Review[]
+  userMissions     UserMission[]
+  userFavorCategories UserFavorCategory[]
 
-  @@map("user")
+  @@map("User")
+}
+
+model Store {
+  storeId      Int       @id @default(autoincrement()) @map("store_id")
+  name         String    @db.VarChar(100)
+  regionName   String    @map("region_name") @db.VarChar(100)
+  address      String    @db.VarChar(255)
+  description  String?   @db.Text
+  status       String    @default("active") @db.VarChar(20)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  
+  reviews      Review[]
+  missions     Mission[]
+
+  @@map("Store")
+}
+
+model Review {
+  reviewId     Int            @id @default(autoincrement()) @map("review_id")
+  storeId      Int            @map("store_id")
+  userId       Int            @map("user_id")
+  rating       Float
+  content      String         @db.Text
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  
+  store        Store          @relation(fields: [storeId], references: [storeId])
+  user         User           @relation(fields: [userId], references: [userId])
+  reviewImages ReviewImage[]
+
+  @@map("Review")
+}
+
+model ReviewImage {
+  id           Int       @id @default(autoincrement())
+  reviewId     Int       @map("review_id")
+  imageUrl     String    @map("image_url") @db.VarChar(500)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  
+  review       Review    @relation(fields: [reviewId], references: [reviewId])
+
+  @@map("ReviewImage")
+}
+
+model Mission {
+  missionId    Int           @id @default(autoincrement()) @map("mission_id")
+  storeId      Int           @map("store_id")
+  rewardPoint  Int           @map("reward_point")
+  title        String        @db.VarChar(200)
+  description  String        @db.Text
+  bossCode     String        @map("boss_code") @db.VarChar(100)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  
+  store        Store         @relation(fields: [storeId], references: [storeId])
+  userMissions UserMission[]
+
+  @@map("Mission")
+}
+
+model UserMission {
+  id           Int       @id @default(autoincrement())
+  missionId    Int       @map("mission_id")
+  userId       Int       @map("user_id")
+  status       String    @default("ongoing") @db.VarChar(20)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  
+  mission      Mission   @relation(fields: [missionId], references: [missionId])
+  user         User      @relation(fields: [userId], references: [userId])
+
+  @@unique([missionId, userId])
+  @@map("UserMission")
+}
+
+model FoodCategory {
+  id           Int                 @id @default(autoincrement())
+  name         String              @db.VarChar(50)
+  
+  userFavorCategories UserFavorCategory[]
+
+  @@map("food_category")
+}
+
+model UserFavorCategory {
+  id             Int          @id @default(autoincrement())
+  foodCategoryId Int          @map("food_category_id")
+  userId         Int          @map("user_id")
+  
+  foodCategory   FoodCategory @relation(fields: [foodCategoryId], references: [id])
+  user           User         @relation(fields: [userId], references: [userId])
+
+  @@map("user_favor_category")
 }
