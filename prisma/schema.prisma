@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int                   @id @default(autoincrement())
+  email               String                @unique(map: "email") @db.VarChar(255)
+  name                String                @db.VarChar(100)
+  gender              user_gender
+  birth               DateTime              @db.Date
+  address             String?               @db.VarChar(255)
+  detailAddress       String?               @map("detail_address") @db.VarChar(255)
+  phoneNumber         String?               @map("phone_number") @db.VarChar(20)
+  user_favor_category user_favor_category[]
+
+  @@map("user")
+}
+
+model food_category {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(50)
+  user_favor_category user_favor_category[]
+}
+
+model store {
+  id        BigInt  @id @default(autoincrement())
+  region_id BigInt?
+  storename String? @db.VarChar(50)
+  address   String? @db.VarChar(50)
+  score     Float?  @db.Float
+}
+
+model user_favor_category {
+  id               Int            @id @default(autoincrement())
+  user_id          Int?
+  food_category_id Int?
+  user             User?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_favor_category_ibfk_1")
+  food_category    food_category? @relation(fields: [food_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_favor_category_ibfk_2")
+
+  @@index([food_category_id], map: "food_category_id")
+  @@index([user_id], map: "user_id")
+}
+
+enum user_gender {
+  male   @map("남성")
+  female @map("여성")
+}

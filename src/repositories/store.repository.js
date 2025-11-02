@@ -1,4 +1,6 @@
+import { prisma } from "../db.config.js";
 import { pool } from "../db.config.js";
+
 
 class storeRepository {
   async putStore(data) {

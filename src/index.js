@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+app.post("/api/v1/users/signup", handleUserSignUp);
 app.post("/api/v1/stores/add", storeController.handleStoreAdd);
 
 app.listen(port, () => {
