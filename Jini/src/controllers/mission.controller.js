@@ -29,6 +29,7 @@ export const handleCreateMission = async (req, res, next) => {
             success: false,
             message: err.message,
         });
+        next(err)
     }
 };
 
@@ -64,5 +65,6 @@ export const handleChallengeMission = async (req, res, next) => {
             success: false,
             message: err.message,
         });
+        next(err)
     }
 };

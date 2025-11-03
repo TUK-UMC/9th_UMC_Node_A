@@ -37,5 +37,6 @@ export const handleCreateReview = async (req, res, next) => {
             success: false,
             message: err.message,
         });
+        next(err)
     }
 };
