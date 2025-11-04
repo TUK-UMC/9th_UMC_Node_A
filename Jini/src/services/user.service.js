@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { bodyToUser } from "../dtos/user.dto.js";
+import { responseFromUser } from "../dtos/user.dto.js";
 import {
     addUser,
     getUser,
@@ -8,8 +8,11 @@ import {
 } from "../repositories/user.repository.js";
 
 export const userSignUp = async (data) => {
-    // 비밀번호 해싱 (salt rounds: 10)
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    // 소셜 로그인이 아닌 경우에만 비밀번호 해싱
+    let hashedPassword = null;
+    if (data.password) {
+        hashedPassword = await bcrypt.hash(data.password, 10);
+    }
 
     const joinUserId = await addUser({
         email: data.email,
@@ -19,7 +22,9 @@ export const userSignUp = async (data) => {
         address: data.address,
         detailAddress: data.detailAddress,
         phoneNumber: data.phoneNumber,
-        password: hashedPassword, // 해싱된 비밀번호 저장
+        password: hashedPassword,
+        social_provider: data.social_provider || null,
+        social_id: data.social_id || null,
     });
 
     if (joinUserId === null) {
@@ -33,5 +38,5 @@ export const userSignUp = async (data) => {
     const user = await getUser(joinUserId);
     const preferences = await getUserPreferencesByUserId(joinUserId);
 
-    return bodyToUser({ user, preferences });
+    return responseFromUser({ user, preferences });
 };

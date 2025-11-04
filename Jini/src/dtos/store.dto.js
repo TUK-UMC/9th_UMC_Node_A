@@ -7,20 +7,20 @@ export const bodyToStore = (body) => {
         regionName: body.regionName || body.region_name,
         address: body.address,
         description: body.description || "",
-        status: body.status !== undefined ? body.status : 1,
+        status: body.status || "active", // ✅ String으로 변경
     };
 };
 
 // Store 엔티티를 응답 DTO로 변환
 export const storeToResponse = (store) => {
     return {
-        storeId: store.store_id,
+        storeId: store.storeId,
         name: store.name,
-        regionName: store.region_name,
+        regionName: store.regionName,
         address: store.address,
         description: store.description,
         status: store.status,
-        createdAt: store.created_at,
-        updatedAt: store.updated_at,
+        createdAt: store.createdAt,
+        updatedAt: store.updatedAt,
     };
 };
