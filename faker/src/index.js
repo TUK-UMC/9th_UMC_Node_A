@@ -25,16 +25,15 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/api/v1/users/signup", handleUserSignUp);
+app.post("/api/v1/users/signup", handleUserSignUp); // 회원가입 엔드포인트 처리기
 
-app.post("/api/v1/stores", handleStoreRegister);
+app.post("/api/v1/stores", handleStoreRegister);  // 가게 등록 엔드포인트 처리기
 
-app.post("/api/v1/stores/:storeId/reviews", handleReviewRegister);
+app.post("/api/v1/stores/:storeId/reviews", handleReviewRegister); // 리뷰 등록 엔드포인트 처리기
 
-app.post("/api/v1/stores/:storeId/missions", handleMissionRegister);
+app.post("/api/v1/stores/:storeId/missions", handleMissionRegister); // 미션 등록 엔드포인트 처리기
 
-app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge);
-
+app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

@@ -15,9 +15,10 @@ export const addUser = async (data) => {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO user (email, name, gender, birth, address, detail_address, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO user (email, password, name, gender, birth, address, detail_address, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         data.email,
+        data.password, // ⭐ 해싱된 비밀번호를 받아서 저장
         data.name,
         data.gender,
         data.birth,

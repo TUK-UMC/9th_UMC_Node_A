@@ -3,6 +3,7 @@ export const bodyToUser = (body) => {
 
   return {
     email: body.email, //필수 
+    password: body.password, // ⭐ 추가: 비밀번호
     name: body.name, // 필수
     gender: body.gender, // 필수
     birth, // 필수
@@ -49,3 +50,4 @@ export const responseFromUser = ({ user, preferences }) => {
     updatedAt: user.updated_at,
   };
 };
+
