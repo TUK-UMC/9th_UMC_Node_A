@@ -1,3 +1,12 @@
+// src/db.config.js 파일 상단에 추가
+
+import { PrismaClient } from "@prisma/client";
+
+// Prisma Client 인스턴스를 한 번만 생성하여 DB 연결을 관리합니다.
+export const prisma = new PrismaClient(
+  {log: ["query"]}
+);
+
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 

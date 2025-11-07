@@ -1,104 +1,95 @@
-import { pool } from "../db.config.js";
+// src/repositories/user.repository.js
 
-// User 데이터 삽입
+// Prisma Client import (db.config.js에서 prisma 객체를 export 한다고 가정)
+import { prisma } from "../db.config.js"; 
+
+
+// User 데이터 삽입 (addUser)
 export const addUser = async (data) => {
-  const conn = await pool.getConnection();
-
   try {
-    const [confirm] = await pool.query(
-      `SELECT EXISTS(SELECT 1 FROM user WHERE email = ?) as isExistEmail;`,
-      data.email
-    );
+    // 이메일 중복 확인 (findFirst 사용)
+    const user = await prisma.user.findFirst({ 
+      where: { email: data.email }
+    });
 
-    if (confirm[0].isExistEmail) {
+    if (user) {
       return null;
     }
 
-    const [result] = await pool.query(
-      `INSERT INTO user (email, password, name, gender, birth, address, detail_address, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-      [
-        data.email,
-        data.password, // ⭐ 해싱된 비밀번호를 받아서 저장
-        data.name,
-        data.gender,
-        data.birth,
-        data.address,
-        data.detailAddress,
-        data.phoneNumber,
-      ]
-    );
+    // 사용자 데이터 삽입 (create 사용)
+    const created = await prisma.user.create({ data: data });
 
-    return result.insertId;
+    return created.id;
   } catch (err) {
     throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err.message})`
     );
-  } finally {
-    conn.release();
   }
 };
 
-// 사용자 정보 얻기
+
+// 사용자 정보 얻기 (getUser)
 export const getUser = async (userId) => {
-  const conn = await pool.getConnection();
-
   try {
-    const [user] = await pool.query(`SELECT * FROM user WHERE id = ?;`, userId);
+    // ⭐ 지침 반영: findFirstOrThrow 사용
+    // 데이터가 없으면 자동 에러 발생 -> Service 계층에서 catch 해야 함
+    const user = await prisma.user.findFirstOrThrow({ 
+      where: { id: userId } 
+    });
 
-    console.log(user);
-
-    if (user.length == 0) {
-      return null;
-    }
-
-    return user;
+    // findFirstOrThrow는 단일 객체를 반환합니다.
+    // 기존 Service와의 호환성을 위해 배열 형태로 래핑하여 반환합니다.
+    return [user]; 
+    
   } catch (err) {
+    // 데이터가 없을 때 발생하는 에러(NotFoundError)를 포함한 모든 에러 처리
     throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err.message})`
     );
-  } finally {
-    conn.release();
   }
 };
 
-// 음식 선호 카테고리 매핑
-export const setPreference = async (userId, foodCategoryId) => {
-  const conn = await pool.getConnection();
 
+// 음식 선호 카테고리 매핑 (setPreference)
+export const setPreference = async (userId, foodCategoryId) => {
   try {
-    await pool.query(
-      `INSERT INTO user_favor_category (food_category_id, user_id) VALUES (?, ?);`,
-      [foodCategoryId, userId]
-    );
+    // ⭐ 지침 반영: create 메서드 사용 및 인자 전달 (userId, foodCategoryId)
+    await prisma.userFavorCategory.create({
+      data: {
+        userId: userId,
+        categoryId: foodCategoryId, // 스키마의 categoryId 필드에 foodCategoryId 전달
+      },
+    });
 
     return;
   } catch (err) {
     throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err.message})`
     );
-  } finally {
-    conn.release();
   }
 };
 
-// 사용자 선호 카테고리 반환
-export const getUserPreferencesByUserId = async (userId) => {
-  const conn = await pool.getConnection();
 
+// 사용자 선호 카테고리 반환 (getUserPreferencesByUserId)
+export const getUserPreferencesByUserId = async (userId) => {
   try {
-    const [preferences] = await pool.query(
-      "SELECT ufc.id, ufc.food_category_id, ufc.user_id, fcl.name " +
-        "FROM user_favor_category ufc JOIN food_category fcl on ufc.food_category_id = fcl.id " +
-        "WHERE ufc.user_id = ? ORDER BY ufc.food_category_id ASC;",
-      userId
-    );
+    const preferences = await prisma.userFavorCategory.findMany({
+      where: { userId: userId },
+      select: { 
+        // FoodCategory 모델의 name 필드만 가져오도록 명시
+        category: { 
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { categoryId: "asc" }, // categoryId 기준으로 정렬
+    });
 
     return preferences;
   } catch (err) {
     throw new Error(
-      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+      `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err.message})`
     );
-  } finally {
-    conn.release();
   }
 };
