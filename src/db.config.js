@@ -1,7 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
+
+export const prisma = new PrismaClient({ log: ["query"] });
+
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
-export const prisma = new PrismaClient();
 
 dotenv.config();
 
