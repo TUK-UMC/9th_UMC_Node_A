@@ -1,1 +1,3 @@
-# 안녕하세요!
+# umc-9th-node.js-first-run
+
+UMC 9기 Node.js 파트
