@@ -36,6 +36,8 @@ model User {
 
   userFavorCategories UserFavorCategory[]
 
+  reviews             UserStoreReview[]
+
   // (관계 필드: UserFavorCategory, Review, Mission 등은 필요시 여기에 추가되어야 합니다.)
 
   @@map("user") // 실제 DB 테이블 이름
@@ -65,4 +67,32 @@ model UserFavorCategory {
   @@index([categoryId], map: "f_category_id")
   @@index([userId], map: "user_id")
   @@map("user_favor_category") // 실제 DB 테이블 이름
+}
+
+// store 테이블에 대응
+model Store {
+  id      Int    @id @default(autoincrement())
+  name    String @db.VarChar(100)
+
+  // UserStoreReview 모델과의 관계
+  reviews UserStoreReview[] 
+
+  @@map("store")
+}
+
+// user_store_review 테이블에 대응
+model UserStoreReview {
+  id        Int     @id @default(autoincrement())
+  
+  // 리뷰 내용
+  content   String  @db.Text
+  
+  // 관계: User와 Store에 대한 외래 키 및 @relation 정의
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int     @map("user_id") // ⭐ user_id_fkey
+
+  store     Store   @relation(fields: [storeId], references: [id])
+  storeId   Int     @map("store_id") // ⭐ store_id_fkey
+
+  @@map("user_store_review")
 }

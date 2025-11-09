@@ -11,6 +11,8 @@ import { handleMissionRegister } from "./controllers/mission.controller.js";
 
 import { handleMissionChallenge } from "./controllers/user_mission.controller.js";
 
+import { handleListStoreReviews } from "./controllers/store.controller.js";
+
 dotenv.config();
 
 const app = express();
@@ -34,6 +36,10 @@ app.post("/api/v1/stores/:storeId/reviews", handleReviewRegister); // 리뷰 등
 app.post("/api/v1/stores/:storeId/missions", handleMissionRegister); // 미션 등록 엔드포인트 처리기
 
 app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
+
+app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews); // 가게 리뷰 목록 조회 엔드포인트 처리기
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+

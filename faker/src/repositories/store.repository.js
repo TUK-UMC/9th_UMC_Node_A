@@ -2,6 +2,8 @@
 
 import { pool } from "../db.config.js";
 
+import { prisma } from "../db.config.js";
+
 // 새로운 가게 데이터를 삽입 (미션 1)
 export const addStore = async (data) => {
   const conn = await pool.getConnection();
@@ -62,4 +64,28 @@ export const isStoreExist = async (storeId) => {
   } finally {
     conn.release();
   }
+};
+
+// ⭐ Repository 함수: 특정 가게의 리뷰 목록 조회 (페이지네이션 적용)
+export const getAllStoreReviews = async (storeId, cursor) => { // cursor 인자 추가
+
+  const reviews = await prisma.userStoreReview.findMany({
+    select: {
+      id: true, 
+      content: true, 
+      storeId: true, 
+      userId: true, 
+      store: true, 
+      user: true, 
+    },
+    where: { 
+      storeId: storeId, 
+      // ⭐ [핵심] cursor 값이 0보다 크면 id > cursor 조건 적용
+      id: { gt: cursor } 
+    },
+    orderBy: { id: "asc" }, // ID 기준 오름차순 정렬
+    take: 5, // ⭐ [핵심] 한 번에 5개 항목만 조회
+  });
+  
+  return reviews;
 };
