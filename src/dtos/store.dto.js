@@ -1,3 +1,5 @@
+import { serializeBigIntDeep } from "../utils/serialize.js";    // bigint 변환 유틸 임포트
+
 class storeDto{
 
     // 가게 추가 요청 바디를 스토어 객체로 변환
@@ -27,13 +29,17 @@ class storeDto{
 
     // 여러 리뷰 객체를 응답 형식에 맞게 변환
     responseFromReviews(reviews) {
-        return {
-            data: reviews,
-            pagination: {
-                cursor: reviews.length ? reviews[reviews.length - 1].id : null,
-            }
-        }
-    }
+    // BigInt 변환을 응답 생성 시점에 수행
+    const serializedReviews = serializeBigIntDeep(reviews);
+    return {
+      data: serializedReviews, // 변환된 데이터 반환
+      pagination: {
+        cursor: serializedReviews.length
+          ? serializedReviews[serializedReviews.length - 1].id
+          : null,
+      },
+    };
+  }
 }
 
 

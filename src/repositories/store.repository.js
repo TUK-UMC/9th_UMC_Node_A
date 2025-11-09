@@ -1,5 +1,4 @@
 import { pool, prisma } from "../db.config.js";
-import { serializeBigIntDeep } from '../utils/serialize.js';
 
 class storeRepository {
   // 가게 추가 api - 레포지토리
@@ -38,18 +37,14 @@ class storeRepository {
 
   // 가게 아이디로 가게 조회
 async getAllStoreReviews(storeId, cursor) {
-  const reviews = await prisma.Review.findMany({
+  return await prisma.Review.findMany({
     select: {
       id: true,
       store: {
-        select: {
-          storename: true
-        }   // 가게 이름만
+        select: { storename: true }
       },
       user: {
-        select: {
-          name: true
-        }  // 유저 이름만
+        select: { name: true }
       },
       score: true,
       body: true
@@ -58,34 +53,8 @@ async getAllStoreReviews(storeId, cursor) {
     orderBy: { id: 'asc' },
     take: 5,
   });
-
-  return serializeBigIntDeep(reviews);
-};
-
-// BigInt를 문자열로 변환하는 재귀 함수
-serializeBigIntDeep(obj) {
-  if (obj === null || obj === undefined) return obj;
-
-  if (typeof obj === 'bigint') {
-    return obj.toString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeBigIntDeep);
-  }
-
-  if (typeof obj === 'object') {
-    const newObj = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        newObj[key] = serializeBigIntDeep(obj[key]);
-      }
-    }
-    return newObj;
-  }
-
-  return obj;
 }
+
 
 }
 

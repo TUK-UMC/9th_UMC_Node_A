@@ -1,5 +1,6 @@
 import storeRepo from "../repositories/store.repository.js";
 import storeDto from "../dtos/store.dto.js";
+import { serializeBigIntDeep } from "../utils/serialize.js";
 
 class storeService {
   async storeAdd(data) {
@@ -27,7 +28,7 @@ class storeService {
 
   // 가게 리뷰 목록 조회 API - 서비스
   async listStoreReviews(storeId, cursor) {
-  const reviews = await storeRepo.getAllStoreReviews(storeId, cursor);
+  const reviews = await storeRepo.getAllStoreReviews(parseInt(storeId), cursor);
   return storeDto.responseFromReviews(reviews);
 };
 }
