@@ -6,13 +6,14 @@ import {
 } from "../repositories/review.repository.js";
 import { isStoreExists } from "../repositories/store.repository.js";
 import { reviewToResponse } from "../dtos/review.dto.js";
+import { NotFoundError } from "../errors.js";
 
 // 리뷰 추가
 export const createReview = async (data) => {
     // 가게 존재 여부 확인
     const storeExists = await isStoreExists(data.storeId);
     if (!storeExists) {
-        throw new Error("존재하지 않는 가게입니다.");
+        throw new NotFoundError("존재하지 않는 가게입니다.", { storeId: data.storeId });
     }
 
     // 리뷰 추가
