@@ -1,6 +1,7 @@
 import storeRepo from "../repositories/store.repository.js";
 import storeDto from "../dtos/store.dto.js";
 import { serializeBigIntDeep } from "../utils/serialize.js";
+import { StoreAlreadyExistsError } from "../error.js";
 
 class storeService {
   async storeAdd(data) {
@@ -9,7 +10,7 @@ class storeService {
     const existingStore = await storeRepo.findStoreByName(data.storename);
 
     if (existingStore) {
-      throw new Error("이미 존재하는 가게입니다.");
+      throw new StoreAlreadyExistsError("이미 존재하는 가게입니다.", data);
     }
 
     // 2. 중복 없으면 가게 추가

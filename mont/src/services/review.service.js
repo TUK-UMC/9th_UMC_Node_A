@@ -1,6 +1,7 @@
 import reviewRepo from "../repositories/review.repository.js";
 import reviewDto from "../dtos/review.dto.js";
 import storeRepo from  "../repositories/store.repository.js";   // 가게 조회를 위한 임포트
+import { StoreNotFoundError } from "../error.js";
 
 class reviewService {
     // 리뷰 추가 API - 서비스
@@ -11,7 +12,7 @@ class reviewService {
 
         if (!storeExists) {
             // 존재하지 않으면 에러 발생
-            throw new Error("존재하지 않는 가게입니다.");
+            throw new StoreNotFoundError("존재하지 않는 가게입니다.", data);
         }
 
             // 가게가 존재하면 리뷰 추가

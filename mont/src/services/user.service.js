@@ -1,5 +1,6 @@
 import userDto from "../dtos/user.dto.js";
 import userRepo from "../repositories/user.repository.js";
+import { DuplicateUserEmailError } from "../error.js";
 
 class userService {
 
@@ -15,7 +16,7 @@ class userService {
     });
 
     if (!joinUserId) {
-      throw new Error("이미 존재하는 이메일입니다.");
+      throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data);
     }
 
     // userRepo.addUser가 id만 반환하므로 joinUserId 사용
