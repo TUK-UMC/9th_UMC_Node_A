@@ -1,35 +1,49 @@
 // src/services/store.service.js
 
-import { addStore, getStore } from "../repositories/store.repository.js";
-import { responseFromStore } from "../dtos/store.dto.js";
+import { responseFromStore, previewReviewResponseDTO } from "../dtos/store.dto.js"; 
+import { addStore, getStore, getAllStoreReviews } from "../repositories/store.repository.js";
 
-import { previewReviewResponseDTO } from "../dtos/store.dto.js"; // DTO 함수 import
-import { getAllStoreReviews } from "../repositories/store.repository.js";
+// ⭐ [추가] 커스텀 에러 클래스 import
+import { ResourceNotFoundError, InvalidInputError } from "../errors.js"; 
 
-export const listStoreReviews = async (storeId, query) => {
+
+// ⭐ [수정] listStoreReviews: 커서 기반 페이지네이션 로직 적용
+export const listStoreReviews = async (storeId, cursor) => {
   
-  // 1. Repository 호출 (스크린샷의 getAllStoreReviews 호출)
-  // query는 페이징 처리를 위해 전달합니다.
-  const reviews = await getAllStoreReviews(storeId, query); 
+  // 1. Repository 호출 (cursor 인자 전달)
+  const reviews = await getAllStoreReviews(storeId, cursor); 
   
-  // 2. DTO를 통해 응답 형식으로 가공 및 반환
-  // (스크린샷의 responseFromReviews 대신 previewReviewResponseDTO를 사용)
-  return previewReviewResponseDTO({ reviews: reviews, cursor: null }); 
+  // 2. ⭐ 다음 커서 값 계산 로직 적용 (take: 5 기준)
+  // take 개수와 리뷰 개수가 같으면, 다음 커서를 설정합니다.
+  const nextCursor = (reviews.length === 5) 
+      ? reviews[reviews.length - 1].id 
+      : null; 
+  
+  // 3. DTO를 통해 응답 형식으로 가공 및 반환 (reviews와 nextCursor 전달)
+  return previewReviewResponseDTO({ 
+      reviews: reviews, 
+      cursor: nextCursor 
+  }); 
 };
 
+
+// ⭐ [수정] registerStore: 커스텀 에러 적용
 export const registerStore = async (data) => {
+  
   // 1. Repository를 통해 가게 정보를 DB에 삽입하고 ID를 받음
   const storeId = await addStore(data);
 
+  // ⭐ [수정] storeId가 null이면, 필수 입력 누락 또는 유효성 문제로 간주하여 커스텀 에러 throw
   if (!storeId) {
-    throw new Error("가게 등록에 실패했습니다.");
+    throw new InvalidInputError("가게 등록에 필요한 필수 정보가 누락되었거나 형식이 올바르지 않습니다.");
   }
 
   // 2. 등록된 가게 정보를 다시 조회
   const newStore = await getStore(storeId);
   
+  // ⭐ [수정] 조회에 실패하면, 리소스가 없다는 커스텀 에러 throw
   if (!newStore) {
-      throw new Error("등록된 가게 정보를 찾을 수 없습니다.");
+      throw new ResourceNotFoundError("등록된 가게", { storeId });
   }
 
   // 3. DTO를 이용해 응답 형식으로 변환하여 반환
