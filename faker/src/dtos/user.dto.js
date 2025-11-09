@@ -50,3 +50,26 @@ export const responseFromUser = ({ user, preferences }) => {
     updatedAt: user.updatedAt,
   };
 };
+
+/**
+ * 사용자가 작성한 리뷰 목록 데이터를 응답 형식에 맞게 가공합니다.
+ * @param {Array<object>} reviews - Prisma로 조회된 리뷰 데이터 (store 포함)
+ * @returns {Array<object>} 클라이언트 응답용 리뷰 배열
+ */
+export const responseFromUserReviews = (reviews) => {
+    return reviews.map(review => ({
+        reviewId: review.id,
+        content: review.content,
+        rating: review.rating,
+        createdAt: review.createdAt, // 리뷰 생성 시간
+        
+        // 조인된 Store 정보에서 필요한 필드 추출
+        store: {
+            storeId: review.store.id,
+            storeName: review.store.name,
+            storeAddress: review.store.address,
+            storeRating: review.store.rating,
+            // ... (필요한 다른 가게 필드)
+        }
+    }));
+};

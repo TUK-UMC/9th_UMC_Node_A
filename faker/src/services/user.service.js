@@ -7,7 +7,13 @@ import {
   getUser,
   getUserPreferencesByUserId,
   setPreference,
+  getUserReviews, // 새로 추가한 함수 import
 } from "../repositories/user.repository.js";
+
+import { 
+    // ...
+    responseFromUserReviews // 새로 만들 DTO 함수 import
+} from "../dtos/user.dto.js";
 
 export const userSignUp = async (data) => {
   // 1. 비밀번호 해싱
@@ -37,4 +43,16 @@ export const userSignUp = async (data) => {
   const preferences = await getUserPreferencesByUserId(joinUserId);
 
   return responseFromUser({ user, preferences });
+};
+
+/**
+ * 사용자 ID를 기반으로 해당 사용자의 모든 리뷰 목록을 조회합니다.
+ * @param {number} userId - 사용자 ID
+ * @returns {object} 가공된 리뷰 응답 데이터
+ */
+export const listUserReviews = async (userId) => {
+  const reviewsWithStore = await getUserReviews(userId);
+
+  // DTO를 사용하여 필요한 데이터만 추출하고 가공
+  return responseFromUserReviews(reviewsWithStore); 
 };

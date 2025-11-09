@@ -1,15 +1,21 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { handleUserSignUp } from "./controllers/user.controller.js";
+import { handleUserSignUp,
+  handleListUserReviews
+ } from "./controllers/user.controller.js";
 
 import { handleStoreRegister } from "./controllers/store.controller.js";
 
 import { handleReviewRegister } from "./controllers/review.controller.js";
 
-import { handleMissionRegister } from "./controllers/mission.controller.js";
+import { handleMissionRegister,
+  handleListStoreMissions
+ } from "./controllers/mission.controller.js";
 
-import { handleMissionChallenge } from "./controllers/user_mission.controller.js";
+import { handleMissionChallenge,
+  handleListChallengingMissions
+ } from "./controllers/user_mission.controller.js";
 
 import { handleListStoreReviews } from "./controllers/store.controller.js";
 
@@ -37,7 +43,13 @@ app.post("/api/v1/stores/:storeId/missions", handleMissionRegister); // 미션 �
 
 app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
 
+app.get("/api/v1/users/:userId/missions", handleListChallengingMissions); // ⭐ 도전 중 미션 목록 조회 API 추가
+
 app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews); // 가게 리뷰 목록 조회 엔드포인트 처리기
+
+app.get("/api/v1/users/:userId/reviews", handleListUserReviews);
+
+app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // ⭐ 미션 목록 조회 API 추가
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

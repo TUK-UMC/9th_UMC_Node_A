@@ -38,6 +38,8 @@ model User {
 
   reviews             UserStoreReview[]
 
+  userMissions        UserMission[]
+
   // (관계 필드: UserFavorCategory, Review, Mission 등은 필요시 여기에 추가되어야 합니다.)
 
   @@map("user") // 실제 DB 테이블 이름
@@ -69,30 +71,77 @@ model UserFavorCategory {
   @@map("user_favor_category") // 실제 DB 테이블 이름
 }
 
-// store 테이블에 대응
+/// prisma/schema.prisma (Store 모델 수정)
+
 model Store {
   id      Int    @id @default(autoincrement())
   name    String @db.VarChar(100)
+  
+  address String? @db.VarChar(255) 
+  rating  Decimal? @db.Decimal(2, 1) 
+  regionId Int?     
 
-  // UserStoreReview 모델과의 관계
   reviews UserStoreReview[] 
+  // ⭐ [필수 추가] Mission 모델과의 관계를 명시합니다. (1:N)
+  missions Mission[] 
 
   @@map("store")
 }
 
-// user_store_review 테이블에 대응
+// prisma/schema.prisma (UserStoreReview 모델 수정)
 model UserStoreReview {
   id        Int     @id @default(autoincrement())
   
-  // 리뷰 내용
+  rating    Decimal @default(4.0) @db.Decimal(2, 1) 
   content   String  @db.Text
   
-  // 관계: User와 Store에 대한 외래 키 및 @relation 정의
+  // ⭐ [추가] 생성 일시 필드 추가
+  createdAt DateTime @default(now()) @map("created_at") // DB 컬럼명을 created_at으로 매핑
+  
   user      User    @relation(fields: [userId], references: [id])
-  userId    Int     @map("user_id") // ⭐ user_id_fkey
+  userId    Int     @map("user_id") 
 
   store     Store   @relation(fields: [storeId], references: [id])
-  storeId   Int     @map("store_id") // ⭐ store_id_fkey
+  storeId   Int     @map("store_id") 
 
   @@map("user_store_review")
+}
+
+// prisma/schema.prisma (Mission 모델 확인)
+model Mission {
+  id      Int      @id @default(autoincrement())
+  storeId Int      @map("store_id") // Store 모델의 ID를 참조
+  title   String   @db.VarChar(255)
+  content String   @db.Text
+  status  String   @default("ACTIVE")
+
+  store Store @relation(fields: [storeId], references: [id]) // Store와의 관계
+
+  userMissions        UserMission[]
+
+  @@map("mission") // 실제 DB 테이블 이름
+}
+// Store 모델에도 reviews와 유사하게 missions Mission[] 관계가 정의되어 있어야 합니다.
+
+// ===========================================
+// ⭐ [누락된 모델 추가] UserMission 모델
+// ===========================================
+model UserMission {
+  id        Int      @id @default(autoincrement())
+  
+  // 상태 및 외래키 필드
+  status    String   @default("IN_PROGRESS") @db.VarChar(20)
+  
+  // User 관계
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @map("user_id")
+
+  // Mission 관계
+  mission   Mission  @relation(fields: [missionId], references: [id])
+  missionId Int      @map("mission_id")
+  
+  // 도전 중복 방지 (선택적)
+  @@unique([userId, missionId]) 
+
+  @@map("user_mission")
 }

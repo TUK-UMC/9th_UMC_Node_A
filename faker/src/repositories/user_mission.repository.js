@@ -1,61 +1,80 @@
 // src/repositories/user_mission.repository.js
 
-import { pool } from "../db.config.js";
+// ✅ Prisma Client import만 사용
+import { prisma } from "../db.config.js"; 
 
-// 미션 도전 중복 여부 확인 (status='IN_PROGRESS'인 경우만 중복으로 간주)
+// 미션 도전 중복 여부 확인 (isAlreadyChallenging)
 export const isAlreadyChallenging = async (userId, missionId) => {
-  const conn = await pool.getConnection();
+  // ❌ conn, pool 제거
   try {
-    const [confirm] = await pool.query(
-      `SELECT EXISTS(SELECT 1 FROM user_mission WHERE user_id = ? AND mission_id = ? AND status = 'IN_PROGRESS') as isExist;`,
-      [userId, missionId]
-    );
-    return confirm[0].isExist === 1; 
+    const mission = await prisma.userMission.findFirst({
+      where: {
+        userId: userId,
+        missionId: missionId,
+        status: 'IN_PROGRESS',
+      }
+    });
+    // 레코드가 존재하면 true 반환
+    return mission !== null; 
   } catch (err) {
     throw new Error(`도전 중 미션 확인 중 오류가 발생했습니다. (${err.message})`);
-  } finally {
-    conn.release();
-  }
+  } 
 };
 
-// 유저의 미션 도전 정보 저장
+// 유저의 미션 도전 정보 저장 (addUserMission)
 export const addUserMission = async (userId, missionId) => {
-  const conn = await pool.getConnection();
+  // ❌ conn, pool 제거
   
   const defaultStatus = 'IN_PROGRESS'; 
   
-  const query = `
-    INSERT INTO user_mission (user_id, mission_id, status) 
-    VALUES (?, ?, ?);
-  `;
-  
   try {
-    const [result] = await pool.query(query, [
-      userId,
-      missionId,
-      defaultStatus,
-    ]);
-
-    return result.insertId;
+    const newUserMission = await prisma.userMission.create({
+      data: {
+        userId: userId,
+        missionId: missionId,
+        status: defaultStatus,
+      }
+    });
+    
+    return newUserMission.id;
   } catch (err) {
     throw new Error(
       `유저 미션 도전 정보 저장 중 오류가 발생했습니다. (${err.message}). 외래키 제약을 확인해주세요.`
     );
-  } finally {
-    conn.release();
-  }
+  } 
 };
 
-// 등록된 UserMission 정보 조회
+// 등록된 UserMission 정보 조회 (getUserMission)
 export const getUserMission = async (userMissionId) => {
-  const conn = await pool.getConnection();
+  // ❌ conn, pool 제거
   try {
-    const [userMission] = await pool.query(`SELECT * FROM user_mission WHERE id = ?;`, userMissionId);
+    const userMission = await prisma.userMission.findUnique({ where: { id: userMissionId } });
     
-    return userMission.length > 0 ? userMission[0] : null; 
+    return userMission;
   } catch (err) {
     throw new Error(`유저 미션 정보 조회 중 오류가 발생했습니다. (${err.message})`);
-  } finally {
-    conn.release();
+  } 
+};
+
+// 특정 사용자가 현재 도전 중인 미션 목록을 조회 (getChallengingMissions)
+export const getChallengingMissions = async (userId, missionId) => {
+  try {
+    const missions = await prisma.userMission.findMany({
+      where: {
+        userId: userId,
+        missionId: missionId,
+        status: 'IN_PROGRESS', 
+      },
+      include: {
+        mission: true, 
+      },
+      orderBy: {
+        id: 'asc',
+      }
+    });
+
+    return missions;
+  } catch (err) {
+    throw new Error(`도전 중인 미션 목록 조회 중 오류가 발생했습니다. (${err.message})`);
   }
 };

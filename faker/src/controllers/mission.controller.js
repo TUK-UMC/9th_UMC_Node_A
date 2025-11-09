@@ -4,6 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { bodyToMission } from "../dtos/mission.dto.js";
 import { registerMission } from "../services/mission.service.js";
 
+import { listStoreMissions } from "../services/mission.service.js"; // 새 Service 함수
+
 // 미션 등록 핸들러
 export const handleMissionRegister = async (req, res, next) => {
   try {
@@ -25,6 +27,29 @@ export const handleMissionRegister = async (req, res, next) => {
 
   } catch (error) {
     // 에러 핸들링
+    res.status(StatusCodes.BAD_REQUEST).json({ 
+        isSuccess: false,
+        code: StatusCodes.BAD_REQUEST,
+        message: error.message 
+    });
+  }
+};
+
+/**
+ * GET /api/v1/stores/:storeId/missions 요청을 처리합니다.
+ */
+export const handleListStoreMissions = async (req, res, next) => {
+  try {
+    const storeId = parseInt(req.params.storeId, 10);
+    
+    const missions = await listStoreMissions(storeId);
+    
+    res.status(StatusCodes.OK).json({
+        message: `${storeId}번 가게의 미션 목록 조회 성공`,
+        data: missions
+    });
+
+  } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({ 
         isSuccess: false,
         code: StatusCodes.BAD_REQUEST,

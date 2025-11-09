@@ -1,44 +1,41 @@
 // src/repositories/review.repository.js
 
-import { pool } from "../db.config.js";
+// 기존 import { pool } from "../db.config.js"; 를 제거하고
+import { prisma } from "../db.config.js"; 
 
-// 리뷰 저장
+// 리뷰 저장 (addReview)
 export const addReview = async ({ userId, storeId, rating, content }) => {
-  const conn = await pool.getConnection();
+  // const conn = await pool.getConnection(); // 제거
 
-  const query = `
-    INSERT INTO review (user_id, store_id, rating, content) 
-    VALUES (?, ?, ?, ?);
-  `;
-  
   try {
-    const [result] = await pool.query(query, [
-      userId,
-      storeId,
-      rating,
-      content,
-    ]);
+    const newReview = await prisma.userStoreReview.create({
+      data: {
+        userId: userId,
+        storeId: storeId,
+        rating: rating,
+        content: content,
+      }
+    });
 
-    return result.insertId;
+    return newReview.id;
   } catch (err) {
     throw new Error(
       `리뷰 저장 중 오류가 발생했습니다. (${err.message})`
     );
-  } finally {
-    conn.release();
   }
+  // finally { conn.release(); } // 제거
 };
 
-// 등록된 리뷰 정보 조회
+// 등록된 리뷰 정보 조회 (getReview)
 export const getReview = async (reviewId) => {
-  const conn = await pool.getConnection();
+  // const conn = await pool.getConnection(); // 제거
   try {
-    const [review] = await pool.query(`SELECT * FROM review WHERE id = ?;`, reviewId);
+    // findUnique는 Primary Key로 조회
+    const review = await prisma.userStoreReview.findUnique({ where: { id: reviewId } });
     
-    return review.length > 0 ? review[0] : null; 
+    return review; // 단일 객체 또는 null 반환
   } catch (err) {
     throw new Error(`리뷰 정보 조회 중 오류가 발생했습니다. (${err.message})`);
-  } finally {
-    conn.release();
   }
+  // finally { conn.release(); } // 제거
 };

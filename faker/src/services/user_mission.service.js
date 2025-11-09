@@ -8,6 +8,22 @@ import {
 } from "../repositories/user_mission.repository.js";
 import { responseFromUserMission } from "../dtos/user_mission.dto.js";
 
+import { getChallengingMissions } from "../repositories/user_mission.repository.js"; 
+import { responseFromUserMissionsList } from "../dtos/user_mission.dto.js"; // DTO 함수 import
+
+/**
+ * 특정 사용자 ID로 도전 중인 미션 목록을 조회하는 Service 함수입니다.
+ * @param {number} userId - 사용자 ID
+ * @returns {Array} 가공된 미션 목록 데이터
+ */
+export const listChallengingMissions = async (userId) => {
+    // 1. Repository 호출
+    const missions = await getChallengingMissions(userId);
+    
+    // 2. DTO를 통해 응답 형식으로 가공
+    return responseFromUserMissionsList(missions);
+};
+
 // 미션 도전 서비스
 export const challengeMission = async (missionId) => {
   // ⭐ 가정: 미션을 도전하는 사용자 ID는 1번 (혹은 실제 존재하는 ID)

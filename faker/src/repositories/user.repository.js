@@ -69,6 +69,32 @@ export const setPreference = async (userId, foodCategoryId) => {
   }
 };
 
+/**
+ * 특정 사용자가 작성한 모든 리뷰를 조회합니다.
+ * @param {number} userId - 사용자 ID
+ * @returns {Promise<Array>} 사용자의 리뷰 및 관련 가게 정보
+ */
+export const getUserReviews = async (userId) => {
+  try {
+    const reviews = await prisma.userStoreReview.findMany({
+      where: {
+        userId: userId, // 특정 userId로 필터링
+      },
+      // 리뷰와 관련된 가게 정보(store)를 함께 조회 (JOIN 효과)
+      include: {
+        store: true, 
+      },
+      orderBy: {
+        createdAt: 'desc', // 최신 리뷰를 상단에 보여주기 위해 내림차순 정렬
+      }
+    });
+
+    return reviews;
+  } catch (err) {
+    throw new Error(`사용자 리뷰 목록 조회 중 오류가 발생했습니다. (${err.message})`);
+  }
+};
+
 
 // 사용자 선호 카테고리 반환 (getUserPreferencesByUserId)
 export const getUserPreferencesByUserId = async (userId) => {

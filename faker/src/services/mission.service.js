@@ -4,6 +4,28 @@ import { isStoreExist } from "../repositories/store.repository.js"; // Store Rep
 import { addMission, getMission } from "../repositories/mission.repository.js";
 import { responseFromMission } from "../dtos/mission.dto.js";
 
+import { getMissionsByStoreId } from "../repositories/mission.repository.js"; 
+
+/**
+ * 특정 가게 ID로 미션 목록을 조회하는 Service 함수입니다.
+ * @param {number} storeId - 가게 ID
+ * @returns {Array} 가공된 미션 목록 데이터
+ */
+export const listStoreMissions = async (storeId) => {
+    // 1. 가게 존재 여부 검증 (선택적)
+    const exists = await isStoreExist(storeId);
+    if (!exists) {
+        throw new Error(`ID ${storeId}인 가게는 존재하지 않아 미션 목록을 조회할 수 없습니다.`);
+    }
+
+    // 2. Repository 호출
+    const missions = await getMissionsByStoreId(storeId); 
+    
+    // 3. DTO를 통해 응답 형식으로 가공 (list 형태로 가공하는 DTO가 없다면 map으로 처리)
+    // responseFromMission은 단일 객체용이므로, 목록 전체를 가공
+    return missions.map(mission => responseFromMission(mission));
+};
+
 // 미션 등록 서비스
 export const registerMission = async (storeId, data) => {
   // 1. 가게 존재 여부 검증 
