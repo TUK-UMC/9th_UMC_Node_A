@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            BigInt      @id @default(autoincrement())
+  email         String   @unique(map: "email") @db.VarChar(255)
+  name          String   @db.VarChar(100)
+  gender        String   @db.VarChar(15)
+  birth         DateTime @db.Date
+  address       String   @db.VarChar(255)
+  detailAddress String?  @map("detail_address") @db.VarChar(255)
+  phoneNumber   String   @map("phone_number") @db.VarChar(15)
+
+  userFavorCategories UserFavorCategory[] // 1:N (user:UserFavorCategory)
+  userMissions UserMission[]  // 1:N (user:UserMission)
+  reviews Review[]  // 1:N (user:Review)
+
+  @@map("user")
+}
+
+model FoodCategory {
+  id   BigInt    @id @default(autoincrement())
+  name String @db.VarChar(100)
+
+  userFavorCategories UserFavorCategory[]
+
+  @@map("food_category")
+}
+
+model UserFavorCategory {
+  id             BigInt          @id @default(autoincrement())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         BigInt          @map("user_id")
+  foodCategory   FoodCategory @relation(fields: [foodCategoryId], references: [id])
+  foodCategoryId BigInt          @map("food_category_id")
+
+  @@index([foodCategoryId], map: "f_category_id")
+  @@index([userId], map: "user_id")
+  @@map("user_favor_category")
+}
+
+model Store {
+  id       BigInt    @id @default(autoincrement())
+  regionId BigInt
+  storename     String    @db.VarChar(50)
+  address  String    @db.VarChar(50)
+  score    Float
+  createdAt DateTime @db.DateTime(6)
+  updatedAt DateTime @db.DateTime(6)
+
+  missions Mission[] // Store ↔ Mission 1:N 관계
+  reviews  Review[]  // Store ↔ Review 1:N 관계
+
+  @@map("store")
+}
+
+model Mission {
+  id          BigInt     @id @default(autoincrement())
+  storeId     BigInt
+  reward      Int
+  deadline    DateTime
+  missionSpec String?
+  createdAt   DateTime   @db.DateTime(6)
+  updatedAt   DateTime   @db.DateTime(6)
+
+  store       Store      @relation(fields: [storeId], references: [id])
+  userMissions UserMission[]
+
+  @@map("mission")
+}
+
+model UserMission {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt
+  missionId BigInt
+  status    String    @db.VarChar(15)
+  createdAt DateTime  @db.DateTime(6)
+  updatedAt DateTime  @db.DateTime(6)
+
+  user      User      @relation(fields: [userId], references: [id])
+  mission   Mission   @relation(fields: [missionId], references: [id])
+
+  @@map("user_mission")
+}
+
+model Review {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt
+  storeId   BigInt
+  body      String?
+  score     Float?
+  createdAt DateTime  @db.DateTime(6)
+
+  user      User      @relation(fields: [userId], references: [id])
+  store     Store     @relation(fields: [storeId], references: [id])
+
+  @@map("review")
+}
