@@ -139,6 +139,11 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+<<<<<<<< HEAD:faker2/.gitignore
+/src/generated/prisma
+
+/src/generated/prisma
+========
 
 /src/generated/prisma
 
@@ -290,3 +295,4 @@ vite.config.ts.timestamp-*
 # IDE file
 .idea
 >>>>>>> 4b004a4e340d51ff8a5d0e91d589853828de58ee
+>>>>>>>> 96e5d238981e3d4bb8c3253a8de51712f74bee9a:mont/.gitignore
