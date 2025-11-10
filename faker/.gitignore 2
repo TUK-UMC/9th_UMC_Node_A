@@ -77,7 +77,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-Jini2/.env
+.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -142,21 +142,3 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
-
-# IDE file
-.idea
-
-# dependency directories
-Jini2/node_modules/
-
-# dotenv environment variable files
-Jini2/.env
-Jini2/.env.*
-
-# Mac Desktop Services Store
-.DS_Store
-.DS_Store.*
-**/.DS_Store
-*/.DS_Store
-Jini2/.DS_Store
-Jini2/src/.DS_Store
