@@ -65,7 +65,7 @@ export const getMissionsByStoreId = async (storeId) => {
   try {
     const missions = await prisma.mission.findMany({
       where: {
-        storeId: storeId, // ⭐ 특정 가게 ID로 필터링
+        storeId: storeId, // 특정 가게 ID로 필터링
       },
       orderBy: {
         id: 'asc', // 미션 ID 기준 정렬

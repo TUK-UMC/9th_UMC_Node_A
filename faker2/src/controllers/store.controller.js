@@ -15,11 +15,11 @@ export const handleStoreRegister = async (req, res, next) => {
     // Service 호출 및 등록된 가게 정보 받기
     const store = await registerStore(storeData); 
     
-    // ⭐ [수정] 통일된 성공 헬퍼 함수 사용 (201 Created)
+    // [수정] 통일된 성공 헬퍼 함수 사용 (201 Created)
     res.status(StatusCodes.CREATED).success(store);
 
   } catch (error) {
-    // ⭐ [수정] 오류 발생 시 next(error)로 전역 오류 처리 미들웨어에 전달
+    // [수정] 오류 발생 시 next(error)로 전역 오류 처리 미들웨어에 전달
     next(error);
   }
 };
@@ -38,11 +38,11 @@ export const handleListStoreReviews = async (req, res, next) => {
     // 2. Service 호출 시 storeId와 파싱된 cursor 값을 전달합니다.
     const reviews = await listStoreReviews(storeId, cursor); 
 
-    // ⭐ [수정] 통일된 성공 헬퍼 함수 사용 (200 OK)
+    // [수정] 통일된 성공 헬퍼 함수 사용 (200 OK)
     res.status(StatusCodes.OK).success(reviews); 
 
   } catch (error) {
-    // ⭐ [수정] 오류 발생 시 next(error)로 전역 오류 처리 미들웨어에 전달
+    // [수정] 오류 발생 시 next(error)로 전역 오류 처리 미들웨어에 전달
     next(error);
   }
 };

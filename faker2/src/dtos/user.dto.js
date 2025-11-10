@@ -3,7 +3,7 @@ export const bodyToUser = (body) => {
 
   return {
     email: body.email, //필수 
-    password: body.password, // ⭐ 추가: 비밀번호
+    password: body.password, // 추가: 비밀번호
     name: body.name, // 필수
     gender: body.gender, // 필수
     birth, // 필수
@@ -21,7 +21,7 @@ export const bodyToUser = (body) => {
 export const responseFromUser = ({ user, preferences }) => {
   
   // 1. 선호 카테고리 배열에서 이름만 추출하여 문자열 배열로 변환
-  // ⭐ [수정 반영] Prisma의 JOIN 결과 구조 (preference.foodCategory.name)에 맞게 수정
+  // [수정 반영] Prisma의 JOIN 결과 구조 (preference.foodCategory.name)에 맞게 수정
   const preferFoods = preferences.map(preference => 
     preference.category.name // Repository에서 category: { select: { name: true } } 로 가져왔다고 가정
   ); 
@@ -42,7 +42,7 @@ export const responseFromUser = ({ user, preferences }) => {
     // DB 필드명 'phone_num'을 DTO 출력명 'phoneNumber'로 변환
     phoneNumber: user.phoneNumber, // DB의 phone_number가 DTO로 넘어왔다고 가정
     
-    // ⭐ [수정 반영] 선호 카테고리 리스트 이름을 변경
+    // [수정 반영] 선호 카테고리 리스트 이름을 변경
     preferCategory: preferFoods,
     
     // 생성/수정일 정보는 Date 객체를 ISO 문자열로 변환하여 제공

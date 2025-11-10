@@ -31,14 +31,14 @@ export const addUser = async (data) => {
 // 사용자 정보 얻기 (getUser)
 export const getUser = async (userId) => {
   try {
-    // ⭐ 지침 반영: findFirstOrThrow 사용
+    // 지침 반영: findFirstOrThrow 사용
     // 데이터가 없으면 자동 에러 발생 -> Service 계층에서 catch 해야 함
     const user = await prisma.user.findFirstOrThrow({ 
       where: { id: userId } 
     });
 
-    // findFirstOrThrow는 단일 객체를 반환합니다.
-    // 기존 Service와의 호환성을 위해 배열 형태로 래핑하여 반환합니다.
+    // findFirstOrThrow는 단일 객체를 반환
+    // 기존 Service와의 호환성을 위해 배열 형태로 래핑하여 반환
     return [user]; 
     
   } catch (err) {
@@ -53,7 +53,6 @@ export const getUser = async (userId) => {
 // 음식 선호 카테고리 매핑 (setPreference)
 export const setPreference = async (userId, foodCategoryId) => {
   try {
-    // ⭐ 지침 반영: create 메서드 사용 및 인자 전달 (userId, foodCategoryId)
     await prisma.userFavorCategory.create({
       data: {
         userId: userId,

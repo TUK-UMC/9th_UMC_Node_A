@@ -6,9 +6,9 @@
 class BaseError extends Error {
     constructor(reason, statusCode = 500, errorCode = "UNKNOWN_ERROR", data) {
         super(reason);
-        // ⭐ 오류의 HTTP 상태 코드
+        // 오류의 HTTP 상태 코드
         this.statusCode = statusCode; 
-        // ⭐ 고유한 식별 코드
+        // 고유한 식별 코드
         this.errorCode = errorCode; 
         this.reason = reason;
         this.data = data;
@@ -25,7 +25,7 @@ class BaseError extends Error {
  */
 export class DuplicateUserEmailError extends BaseError {
     constructor(reason, data) {
-        // ⭐ super()를 호출하여 BaseError의 속성을 설정합니다.
+        // super()를 호출하여 BaseError의 속성을 설정합니다.
         // 상태 코드 409 (Conflict), 에러 코드 "U001"
         super(reason, 409, "U001", data); 
     }
