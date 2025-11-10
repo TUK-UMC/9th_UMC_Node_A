@@ -20,7 +20,7 @@ export const userSignUp = async (data) => {
   // Repository 함수 호출 시 db 인자는 제거하고 data만 전달합니다.
   const joinUserId = await addUser({
     email: data.email,
-    password: hashedPassword, // ⭐ 해싱된 비밀번호 전달
+    password: hashedPassword, // 해싱된 비밀번호 전달
     name: data.name,
     gender: data.gender,
     birth: data.birth,
@@ -30,7 +30,6 @@ export const userSignUp = async (data) => {
     // data 객체는 preferences 필드를 포함하고 있으나, addUser는 DB 필드만 사용한다고 가정합니다.
   });
 
-  // ⭐ [수정] 이메일 중복 시, DuplicateUserEmailError를 throw하고 실패한 data를 포함시킵니다.
   if (joinUserId === null) {
     throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data); 
   }
@@ -49,11 +48,11 @@ export const userSignUp = async (data) => {
 };
 
 /**
- * 사용자 ID를 기반으로 해당 사용자의 모든 리뷰 목록을 조회합니다.
+ * 사용자 ID를 기반으로 해당 사용자의 모든 리뷰 목록을 조회
  */
 export const listUserReviews = async (userId) => {
   const reviewsWithStore = await getUserReviews(userId);
 
-  // DTO를 사용하여 필요한 데이터만 추출하고 가공
+  // DTO를 사용하여 필요한 데이터만 추출
   return responseFromUserReviews(reviewsWithStore); 
 };

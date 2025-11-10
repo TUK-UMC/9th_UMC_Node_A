@@ -24,7 +24,7 @@ export const previewReviewResponseDTO = (data) => {
   // data 객체는 { reviews: [], cursor: null } 형태일 것을 예상합니다.
   
   return {
-    // ⭐ 스크린샷의 뼈대 반영: 임시 데이터로 응답 구조 정의
+    // 스크린샷의 뼈대 반영: 임시 데이터로 응답 구조 정의
     reviewData: data.reviews || null, 
     cursorId: data.cursor || null,
   };

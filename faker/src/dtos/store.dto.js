@@ -27,7 +27,7 @@ export const responseFromStore = (store) => {
  * (pagination과 data 필드를 분리하여 반환합니다.)
  */
 export const previewReviewResponseDTO = (data) => {
-  // ⭐ 1. 리뷰 데이터 가공 (필요한 필드만 선택하고, 관계 객체를 평탄화)
+  // 1. 리뷰 데이터 가공 (필요한 필드만 선택하고, 관계 객체를 평탄화)
   const processedReviews = data.reviews.map(review => ({
       // UserStoreReview 필드
       reviewId: review.id,
@@ -42,10 +42,10 @@ export const previewReviewResponseDTO = (data) => {
   }));
   
   return {
-    data: processedReviews, // ⭐ 가공된 리뷰 목록
+    data: processedReviews, // 가공된 리뷰 목록
     
     pagination: {
-        // ⭐ 다음 요청에 사용할 cursor ID 반환
+        // 다음 요청에 사용할 cursor ID 반환
         cursor: data.cursor || null,
     },
   };

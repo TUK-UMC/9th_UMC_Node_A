@@ -96,15 +96,15 @@ app.post("/api/v1/stores/:storeId/missions", handleMissionRegister); // 미션 �
 
 app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
 
-app.get("/api/v1/users/:userId/missions", handleListChallengingMissions); // ⭐ 도전 중 미션 목록 조회 API 추가
+app.get("/api/v1/users/:userId/missions", handleListChallengingMissions); // 도전 중 미션 목록 조회 API 
 
 app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews); // 가게 리뷰 목록 조회 엔드포인트 처리기
 
 app.get("/api/v1/users/:userId/reviews", handleListUserReviews);
 
-app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // ⭐ 미션 목록 조회 API 추가
+app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // 미션 목록 조회 API 추가
 
-// ============== 8. 전역 오류 처리 미들웨어 (⭐ 에러 핸들링 핵심) ==============
+// ============== 8. 전역 오류 처리 미들웨어 (에러 핸들링 핵심) ==============
 // 에러 핸들링 미들웨어는 항상 다른 라우트와 미들웨어 뒤에 위치해야 합니다.
 app.use((err, req, res, next) => {
   if (res.headersSent) {
