@@ -6,8 +6,53 @@ import { registerMission } from "../services/mission.service.js";
 
 import { listStoreMissions } from "../services/mission.service.js"; // 새 Service 함수
 
-// 미션 등록 핸들러
 export const handleMissionRegister = async (req, res, next) => {
+/*
+#swagger.summary = '미션 등록 API';
+#swagger.description = '특정 가게에 새로운 미션을 등록합니다.';
+#swagger.parameters['storeId'] = {
+  in: 'path',
+  description: '미션을 등록할 가게 ID',
+  required: true,
+  type: 'number'
+}
+#swagger.requestBody = {
+  required: true,
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          title: { type: "string", example: "시그니처 메뉴 인증" },
+          content: { type: "string", example: "주문하고 사진 찍어 인증" }
+        }
+      }
+    }
+  }
+}
+#swagger.responses[201] = {
+  description: "미션 등록 성공 응답",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "SUCCESS" },
+          success: { $ref: "#/definitions/MissionResponse" } // Mission DTO 참조
+        }
+      }
+    }
+  }
+}
+#swagger.responses[404] = {
+  description: "가게 ID를 찾을 수 없는 경우",
+  content: {
+    "application/json": {
+      schema: { $ref: "#/definitions/ResourceNotFoundError" } 
+    }
+  }
+}
+*/
   try {
     // 1. Path Parameter에서 storeId 획득 (숫자형으로 변환)
     const storeId = parseInt(req.params.storeId, 10);
@@ -36,9 +81,44 @@ export const handleMissionRegister = async (req, res, next) => {
 };
 
 /**
- * GET /api/v1/stores/:storeId/missions 요청을 처리합니다.
+ * GET /api/v1/stores/:storeId/missions 요청 처리
  */
 export const handleListStoreMissions = async (req, res, next) => {
+/*
+#swagger.summary = '가게 미션 목록 조회 API';
+#swagger.description = '특정 가게에 등록된 모든 미션 목록을 조회합니다.';
+#swagger.parameters['storeId'] = {
+  in: 'path',
+  description: '미션을 조회할 가게 ID',
+  required: true,
+  type: 'number'
+}
+#swagger.responses[200] = {
+  description: "미션 목록 조회 성공 응답",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "SUCCESS" },
+          success: { 
+            type: "array",
+            items: { $ref: "#/definitions/MissionResponse" }
+          }
+        }
+      }
+    }
+  }
+}
+#swagger.responses[404] = {
+  description: "가게 ID를 찾을 수 없는 경우",
+  content: {
+    "application/json": {
+      schema: { $ref: "#/definitions/ResourceNotFoundError" } 
+    }
+  }
+}
+*/
   try {
     const storeId = parseInt(req.params.storeId, 10);
     

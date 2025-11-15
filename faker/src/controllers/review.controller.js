@@ -4,8 +4,62 @@ import { StatusCodes } from "http-status-codes";
 import { bodyToReview } from "../dtos/review.dto.js";
 import { registerReview } from "../services/review.service.js";
 
-// 리뷰 등록 핸들러
 export const handleReviewRegister = async (req, res, next) => {
+/*
+#swagger.summary = '리뷰 등록 API';
+#swagger.description = '특정 가게에 리뷰를 작성합니다. (사용자 ID는 Service에서 가정)';
+#swagger.parameters['storeId'] = {
+  in: 'path',
+  description: '리뷰를 작성할 가게 ID',
+  required: true,
+  type: 'number'
+}
+#swagger.requestBody = {
+  required: true,
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          rating: { type: "number", example: 4.5, description: "평점 (1.0 ~ 5.0)" },
+          content: { type: "string", example: "음식이 정말 맛있었어요!", nullable: true }
+        },
+        required: ["rating"] // 평점은 필수라고 가정
+      }
+    }
+  }
+}
+#swagger.responses[201] = {
+  description: "리뷰 등록 성공 응답",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object",
+        properties: {
+          resultType: { type: "string", example: "SUCCESS" },
+          success: { $ref: "#/definitions/ReviewResponse" } // Review DTO 참조
+        }
+      }
+    }
+  }
+}
+#swagger.responses[404] = {
+  description: "가게 ID를 찾을 수 없는 경우",
+  content: {
+    "application/json": {
+      schema: { $ref: "#/definitions/ResourceNotFoundError" } 
+    }
+  }
+}
+#swagger.responses[400] = {
+  description: "유효성 검사 실패 (평점 누락 등)",
+  content: {
+    "application/json": {
+      schema: { $ref: "#/definitions/InvalidInputError" } 
+    }
+  }
+}
+*/
   try {
     // 1. Path Parameter에서 storeId 획득 (숫자형으로 변환)
     const storeId = parseInt(req.params.storeId, 10);
