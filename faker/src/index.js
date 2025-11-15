@@ -1,4 +1,7 @@
-// src/index.js (최종 통합본)
+// src/index.js
+
+import swaggerAutogen from "swagger-autogen";
+import swaggerUiExpress from "swagger-ui-express";
 
 // ============== 1. 기본 모듈 및 미들웨어 임포트 ==============
 import express from 'express';
@@ -23,7 +26,7 @@ const app = express();
 const port = process.env.PORT || 3000; 
 
 
-// ============== 4. 응답 헬퍼 함수 등록 (⭐ API 응답 통일 핵심) ==============
+// ============== 4. 응답 헬퍼 함수 등록 ==============
 app.use((req, res, next) => {
     // 성공 응답 헬퍼
     res.success = (success) => {
@@ -47,10 +50,10 @@ app.use((req, res, next) => {
 app.use(morgan('dev')); 
 app.use(cookieParser()); 
 
-app.use(cors()); 
-app.use(express.static("public")); 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: false }));
+app.use(cors()); // cors 방식 허용
+app.use(express.static("public"));  // 정적 파일 접근 
+app.use(express.json());  // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)
+app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
 
 // ============== 6. 인증 미들웨어 및 뷰 테스트 라우트 ==============
@@ -86,6 +89,49 @@ app.get('/getcookie', (req, res) => {
     res.send(myCookie ? `당신의 쿠키: ${myCookie}` : '쿠키가 없습니다.');
 });
 
+
+// ============== 7. Swagger 문서 설정 ==============
+
+// 1. Swagger UI 렌더링을 위한 라우트 설정
+app.use(
+    "/docs",
+    swaggerUiExpress.serve,
+    swaggerUiExpress.setup({}, {
+      swaggerOptions: {
+        url: "/openapi.json", // UI가 이 엔드포인트에서 생성된 문서를 가져오도록 설정
+      },
+    })
+);
+
+// 2. swagger-autogen을 이용해 동적으로 OpenAPI JSON 문서를 생성하는 라우트
+app.get("/openapi.json", async (req, res, next) => {
+    // #swagger.ignore = true (이 라우트 자체는 문서화에서 제외)
+    const options = {
+        openapi: "3.0.0",
+        disableLogs: true,
+        writeOutputFile: false,
+    };
+    const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+    const routes = ["./src/index.js"]; // 스캔할 라우트 파일 목록
+    const doc = {
+        info: {
+            title: "UMC 9th",
+            description: "UMC 9th Node.js 테스트 프로젝트입니다.",
+        },
+        host: "localhost:3000",
+    };
+
+    try {
+      const result = await swaggerAutogen(options)(outputFile, routes, doc);
+      res.json(result ? result.data : null);
+    } catch (error) {
+      console.error("Swagger 문서 생성 오류:", error);
+      res.status(500).json({ error: "문서 생성 중 오류가 발생했습니다." });
+    }
+});
+
+
+// ============== 8. API 라우트 ==============
 app.post("/api/v1/users/signup", handleUserSignUp); // 회원가입 엔드포인트 처리기
 
 app.post("/api/v1/stores", handleStoreRegister);  // 가게 등록 엔드포인트 처리기
@@ -104,8 +150,8 @@ app.get("/api/v1/users/:userId/reviews", handleListUserReviews);
 
 app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // 미션 목록 조회 API 추가
 
-// ============== 8. 전역 오류 처리 미들웨어 (에러 핸들링 핵심) ==============
-// 에러 핸들링 미들웨어는 항상 다른 라우트와 미들웨어 뒤에 위치해야 합니다.
+// ============== 9. 전역 오류 처리 미들웨어 (에러 핸들링 핵심) ==============
+// 에러 핸들링 미들웨어는 항상 다른 라우트와 미들웨어 뒤에 위치
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
@@ -122,4 +168,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
