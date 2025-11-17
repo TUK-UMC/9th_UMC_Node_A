@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import swaggerAutogen from "swagger-autogen";
+import swaggerUiExpress from "swagger-ui-express";
 import { handleUserSignUp } from "./controllers/user.controller.js";
 import { handleCreateStore } from "./controllers/store.controller.js";
 import { handleCreateReview } from "./controllers/review.controller.js";
@@ -42,6 +44,15 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.use(morgan("dev"));
 app.use(cookieParser());
 
+app.use(
+    "/docs",
+    swaggerUiExpress.serve,
+    swaggerUiExpress.setup({}, {
+        swaggerOptions: {
+            url: "/openapi.json",
+        },
+    })
+);
 
 const isLogin = (req, res, next) => {
     // cookie-parser가 만들어준 req.cookies 객체에서 username을 확인
@@ -121,6 +132,29 @@ app.get('/set-logout', (req, res) => {
     res.clearCookie('username');
     res.send('로그아웃 완료 (쿠키 삭제). <a href="/">메인으로</a>');
 });
+
+
+app.get("/openapi.json", async (req, res, next) => {
+    // #swagger.ignore = true
+    const options = {
+        openapi: "3.0.0",
+        disableLogs: true,
+        writeOutputFile: false,
+    };
+    const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+    const routes = ["./src/index.js"];
+    const doc = {
+        info: {
+            title: "UMC 9th",
+            description: "UMC 9th Node.js 테스트 프로젝트입니다.",
+        },
+        host: "localhost:3000",
+    };
+
+    const result = await swaggerAutogen(options)(outputFile, routes, doc);
+    res.json(result ? result.data : null);
+});
+
 
 // 1-1. 특정 지역에 가게 추가하기 API
 app.post("/api/v1/stores", handleCreateStore);
