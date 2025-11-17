@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 
+### Custom ###
+# prisma generated files
+/pirsma/migrations/*
+
 ### Node ###
 # Logs
 logs
