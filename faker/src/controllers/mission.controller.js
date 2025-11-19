@@ -80,7 +80,7 @@ export const handleMissionRegister = async (req, res, next) => {
   }
 };
 
-/**
+/*
  * GET /api/v1/stores/:storeId/missions 요청 처리
  */
 export const handleListStoreMissions = async (req, res, next) => {
