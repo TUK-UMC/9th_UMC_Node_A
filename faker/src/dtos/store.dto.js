@@ -22,12 +22,11 @@ export const responseFromStore = (store) => {
   };
 };
 
-/**
- * 리뷰 목록 조회 결과를 클라이언트 응답 형식에 맞게 변환합니다.
- * (pagination과 data 필드를 분리하여 반환합니다.)
+/*
+ * 리뷰 목록 조회 결과를 클라이언트 응답 형식에 맞게 변환
+ * (pagination과 data 필드를 분리하여 반환)
  */
 export const previewReviewResponseDTO = (data) => {
-  // 1. 리뷰 데이터 가공 (필요한 필드만 선택하고, 관계 객체를 평탄화)
   const processedReviews = data.reviews.map(review => ({
       // UserStoreReview 필드
       reviewId: review.id,

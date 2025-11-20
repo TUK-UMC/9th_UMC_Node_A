@@ -10,8 +10,17 @@ import dotenv from "dotenv";
 import cookieParser from 'cookie-parser'; 
 import morgan from 'morgan'; 
 
+import passport from "passport";
+import { googleStrategy, jwtStrategy } from "./auth.config.js";
+import { prisma } from "./db.config.js";
+
+import { generateAccessToken } from "./auth.config.js";
+
+passport.use(googleStrategy);
+passport.use(jwtStrategy); 
+
 // ============== 2. 컨트롤러 임포트 (기존 미션 코드) ==============
-import { handleUserSignUp, handleListUserReviews } from "./controllers/user.controller.js";
+import { handleUserSignUp, handleListUserReviews, handleUserUpdate } from "./controllers/user.controller.js";
 import { handleStoreRegister, handleListStoreReviews } from "./controllers/store.controller.js";
 import { handleReviewRegister } from "./controllers/review.controller.js";
 import { handleMissionRegister, handleListStoreMissions } from "./controllers/mission.controller.js";
@@ -24,6 +33,8 @@ dotenv.config();
 const app = express();
 // 환경 변수에 포트가 없으면 3000번을 기본값으로 사용
 const port = process.env.PORT || 3000; 
+
+const authMiddleware = passport.authenticate('jwt', { session: false });
 
 
 // ============== 4. 응답 헬퍼 함수 등록 ==============
@@ -55,18 +66,22 @@ app.use(express.static("public"));  // 정적 파일 접근
 app.use(express.json());  // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 
+app.use(passport.initialize());
+
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
+
 
 // ============== 6. 인증 미들웨어 및 뷰 테스트 라우트 ==============
-const isLogin = (req, res, next) => {
-    const { username } = req.cookies; 
-    if (username) {
-        console.log(`[인증 성공] ${username}님, 환영합니다.`);
-        next(); 
-    } else {
-        console.log('[인증 실패] 로그인이 필요합니다.');
-        res.status(401).send('<script>alert("로그인이 필요합니다!");location.href="/login";</script>');
-    }
-};
+
+const isLogin = passport.authenticate('jwt', { session: false });
+
+app.get('/mypage', isLogin, (req, res) => {
+  res.status(200).success({
+    message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
+    user: req.user,
+  });
+});
 
 app.get('/', (req, res) => { res.send(`<h1>메인 페이지</h1>...`); });
 app.get('/login', (req, res) => { res.send('<h1>로그인 페이지</h1>...'); });
@@ -111,7 +126,7 @@ app.get("/openapi.json", async (req, res, next) => {
         disableLogs: true,
         writeOutputFile: false,
     };
-    const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+    const outputFile = "/dev/null"; // 파일 출력은 사용하지 않음
     const routes = ["./src/index.js"]; // 스캔할 라우트 파일 목록
     const doc = {
         info: {
@@ -134,13 +149,13 @@ app.get("/openapi.json", async (req, res, next) => {
 // ============== 8. API 라우트 ==============
 app.post("/api/v1/users/signup", handleUserSignUp); // 회원가입 엔드포인트 처리기
 
-app.post("/api/v1/stores", handleStoreRegister);  // 가게 등록 엔드포인트 처리기
+app.post("/api/v1/stores",authMiddleware, handleStoreRegister);  // 가게 등록 엔드포인트 처리기
 
-app.post("/api/v1/stores/:storeId/reviews", handleReviewRegister); // 리뷰 등록 엔드포인트 처리기
+app.post("/api/v1/stores/:storeId/reviews", authMiddleware,handleReviewRegister); // 리뷰 등록 엔드포인트 처리기
 
-app.post("/api/v1/stores/:storeId/missions", handleMissionRegister); // 미션 등록 엔드포인트 처리기
+app.post("/api/v1/stores/:storeId/missions",authMiddleware, handleMissionRegister); // 미션 등록 엔드포인트 처리기
 
-app.post("/api/v1/missions/:missionId/challenge", handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
+app.post("/api/v1/missions/:missionId/challenge", authMiddleware,handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
 
 app.get("/api/v1/users/:userId/missions", handleListChallengingMissions); // 도전 중 미션 목록 조회 API 
 
@@ -150,6 +165,7 @@ app.get("/api/v1/users/:userId/reviews", handleListUserReviews);
 
 app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // 미션 목록 조회 API 추가
 
+app.patch("/api/v1/users", authMiddleware, handleUserUpdate);
 // ============== 9. 전역 오류 처리 미들웨어 (에러 핸들링 핵심) ==============
 // 에러 핸들링 미들웨어는 항상 다른 라우트와 미들웨어 뒤에 위치
 app.use((err, req, res, next) => {
@@ -167,4 +183,45 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+});
+
+
+// ============== 10. 구글 OAuth2 로그인 라우트 ==============
+
+app.get("/oauth2/login/google", 
+  passport.authenticate("google", { 
+    session: false 
+  })
+);
+app.get(
+  "/oauth2/callback/google",
+  passport.authenticate("google", {
+	  session: false,
+    failureRedirect: "/login-failed",
+  }),
+  (req, res) => {
+    const tokens = req.user; 
+
+    res.status(200).json({
+      resultType: "SUCCESS",
+      error: null,
+      success: {
+          message: "Google 로그인 성공!",
+          tokens: tokens, // { "accessToken": "...", "refreshToken": "..." }
+      }
+    });
+  }
+);
+
+
+app.get('/test/token/:userId', (req, res) => {
+    const userId = parseInt(req.params.userId, 10);
+    // 임시 유저 정보로 토큰 생성
+    const token = generateAccessToken({ id: userId, email: "test@example.com" });
+    
+    // res.success 헬퍼를 이용해 응답
+    res.success({ 
+        message: `${userId}번 유저의 토큰이 발급되었습니다.`,
+        token: token 
+    });
 });

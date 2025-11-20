@@ -80,9 +80,9 @@ export const handleMissionRegister = async (req, res, next) => {
   }
 };
 
-/*
- * GET /api/v1/stores/:storeId/missions 요청 처리
- */
+
+// GET /api/v1/stores/:storeId/missions 요청 처리
+ 
 export const handleListStoreMissions = async (req, res, next) => {
 /*
 #swagger.summary = '가게 미션 목록 조회 API';
