@@ -48,10 +48,11 @@ export const handleMissionChallenge = async (req, res, next) => {
     // 1. Path Parameter에서 missionId 획득 (숫자형으로 변환)
     const missionId = parseInt(req.params.missionId, 10);
     
-    console.log(`미션 ID ${missionId} 도전을 요청했습니다!`);
-    
+    // console.log(`미션 ID ${missionId} 도전을 요청했습니다!`);
+    const userId = req.user.id;
+
     // 2. Service 호출 및 미션 도전 정보 받기
-    const userMission = await challengeMission(missionId); 
+    const userMission = await challengeMission(userId,missionId); 
     
     res.status(StatusCodes.CREATED).json({ 
         message: "미션 도전을 시작합니다.",
@@ -60,16 +61,12 @@ export const handleMissionChallenge = async (req, res, next) => {
 
   } catch (error) {
     // 에러 핸들링
-    res.status(StatusCodes.BAD_REQUEST).json({ 
-        isSuccess: false,
-        code: StatusCodes.BAD_REQUEST,
-        message: error.message 
-    });
+    next(error);
   }
 };
 
 export const handleListChallengingMissions = async (req, res, next) => {
-  /*
+/*
 #swagger.summary = '사용자 도전 중인 미션 목록 조회';
 #swagger.description = '특정 사용자가 현재 도전 중인 미션 목록을 조회합니다.';
 #swagger.parameters['userId'] = {

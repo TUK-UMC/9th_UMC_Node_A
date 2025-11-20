@@ -1,6 +1,5 @@
 // src/repositories/user.repository.js
 
-// Prisma Client import (db.config.js에서 prisma 객체를 export 한다고 가정)
 import { prisma } from "../db.config.js"; 
 
 
@@ -68,7 +67,7 @@ export const setPreference = async (userId, foodCategoryId) => {
   }
 };
 
-/**
+/*
  * 특정 사용자가 작성한 모든 리뷰를 조회합니다.
  * @param {number} userId - 사용자 ID
  * @returns {Promise<Array>} 사용자의 리뷰 및 관련 가게 정보
@@ -116,5 +115,24 @@ export const getUserPreferencesByUserId = async (userId) => {
     throw new Error(
       `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err.message})`
     );
+  }
+};
+
+export const updateUser = async (userId, data) => {
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: data.name,
+        gender: data.gender,
+        birth: data.birth,
+        address: data.address,
+        detailAddress: data.detailAddress,
+        phoneNumber: data.phoneNumber,
+      },
+    });
+    return updatedUser;
+  } catch (err) {
+    throw new Error(`사용자 정보 수정 중 오류가 발생했습니다. (${err.message})`);
   }
 };

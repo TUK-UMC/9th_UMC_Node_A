@@ -3,7 +3,7 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser } from "../dtos/user.dto.js";
 import { userSignUp,
-  listUserReviews
+  listUserReviews, updateUserInfo
 } from "../services/user.service.js";
 export const handleUserSignUp = async (req, res, next) => {
   /*
@@ -152,5 +152,63 @@ export const handleListUserReviews = async (req, res, next) => {
   } catch (err) {
     // 오류 발생 시 next(err)를 호출
     next(err); 
+  }
+};
+
+
+/*
+  #swagger.summary = '사용자 정보 수정 API';
+  #swagger.description = '로그인한 사용자의 정보(이름, 생일, 주소 등)를 수정합니다.';
+  #swagger.security = [{ "bearerAuth": [] }]
+  #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            name: { type: "string", example: "홍길동" },
+            gender: { type: "string", example: "남성" },
+            birth: { type: "string", format: "date", example: "1995-05-05" },
+            address: { type: "string", example: "서울시 관악구" },
+            detailAddress: { type: "string", example: "101호" },
+            phoneNumber: { type: "string", example: "010-1111-2222" }
+          }
+        }
+      }
+    }
+  };
+  #swagger.responses[200] = {
+    description: "정보 수정 성공 응답",
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            resultType: { type: "string", example: "SUCCESS" },
+            success: {
+              type: "object",
+              properties: {
+                userId: { type: "number" },
+                name: { type: "string" },
+                address: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+*/
+export const handleUserUpdate = async (req, res, next) => {
+  try {
+    // 인증 미들웨어를 거쳤다면 req.user에 사용자 정보가 있습니다.
+    const userId = req.user.id; 
+    
+    const updatedUser = await updateUserInfo(userId, req.body);
+    
+    res.status(StatusCodes.OK).success(updatedUser);
+  } catch (error) {
+    next(error);
   }
 };
