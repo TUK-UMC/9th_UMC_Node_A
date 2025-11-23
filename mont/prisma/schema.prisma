@@ -91,13 +91,13 @@ model UserMission {
 
 model Review {
   id        BigInt    @id @default(autoincrement())
-  userId    BigInt
-  storeId   BigInt
+  userId    BigInt?   // null available    
+  storeId   BigInt    
   body      String?
   score     Float?
   createdAt DateTime  @db.DateTime(6)
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@map("review")

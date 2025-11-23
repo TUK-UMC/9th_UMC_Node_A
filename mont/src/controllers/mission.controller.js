@@ -9,79 +9,6 @@ class missionController {
 
     // 미션 추가 API - 컨트롤러
     async handleMissionAdd(req, res, next) {
-      /*
-    #swagger.summary = '미션 추가 API';
-    #swagger.tags = ['Missions'];
-    #swagger.requestBody = {
-      required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            required: ["storeId", "title", "description", "reward"],
-            properties: {
-              storeId: { type: "number", example: 1 },
-              title: { type: "string", example: "방문 후 인증샷 올리기" },
-              description: { type: "string", example: "가게 방문 후 인증샷을 올려주세요" },
-              reward: { type: "number", example: 100 }
-            }
-          }
-        }
-      }
-    };
-    #swagger.responses[200] = {
-      description: "미션 추가 성공 응답",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              resultType: { type: "string", example: "SUCCESS" },
-              error: { type: "object", nullable: true, example: null },
-              success: {
-                type: "object",
-                properties: {
-                  result: {
-                    type: "object",
-                    properties: {
-                      id: { type: "number", example: 1 },
-                      storeId: { type: "number", example: 1 },
-                      title: { type: "string", example: "방문 후 인증샷 올리기" },
-                      description: { type: "string", example: "가게 방문 후 인증샷을 올려주세요" },
-                      reward: { type: "number", example: 100 },
-                      createdAt: { type: "string", format: "date-time" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-    #swagger.responses[400] = {
-      description: "미션 추가 실패 응답 - 가게 없음",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              resultType: { type: "string", example: "FAIL" },
-              error: {
-                type: "object",
-                properties: {
-                  errorCode: { type: "string", example: "STORE_NOT_FOUND" },
-                  reason: { type: "string", example: "존재하지 않는 가게입니다." },
-                  data: { type: "object", nullable: true }
-                }
-              },
-              success: { type: "object", nullable: true, example: null }
-            }
-          }
-        }
-      }
-    };
-  */
         try {
             console.log("미션 추가를 요청합니다.");
             console.log("body: ", req.body);
@@ -101,81 +28,18 @@ class missionController {
 
     // 유저가 도전중인 미션에 추가 API - 컨트롤러
     async hanldeUserMissionAdd(req, res, next) {
-      /*
-    #swagger.summary = '유저 미션 추가 API';
-    #swagger.tags = ['Missions'];
-    #swagger.requestBody = {
-      required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            required: ["userId", "missionId"],
-            properties: {
-              userId: { type: "number", example: 1 },
-              missionId: { type: "number", example: 1 }
-            }
-          }
-        }
-      }
-    };
-    #swagger.responses[200] = {
-      description: "유저 미션 추가 성공 응답",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              resultType: { type: "string", example: "SUCCESS" },
-              error: { type: "object", nullable: true, example: null },
-              success: {
-                type: "object",
-                properties: {
-                  result: {
-                    type: "object",
-                    properties: {
-                      id: { type: "number", example: 1 },
-                      userId: { type: "number", example: 1 },
-                      missionId: { type: "number", example: 1 },
-                      status: { type: "string", example: "ONGOING" },
-                      createdAt: { type: "string", format: "date-time" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-    #swagger.responses[400] = {
-      description: "유저 미션 추가 실패 응답 - 미션 없음",
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              resultType: { type: "string", example: "FAIL" },
-              error: {
-                type: "object",
-                properties: {
-                  errorCode: { type: "string", example: "MISSION_NOT_FOUND" },
-                  reason: { type: "string", example: "존재하지 않는 미션입니다." },
-                  data: { type: "object", nullable: true }
-                }
-              },
-              success: { type: "object", nullable: true, example: null }
-            }
-          }
-        }
-      }
-    };
-  */
         try {
             console.log("유저 미션 추가를 요청합니다.");
             console.log("body: ", req.body);
+            console.log("user: ", req.user);
+            
+            // 인증된 사용자의 ID를 사용
+            const userMissionData = {
+                ...req.body,
+                userId: req.user.id
+            };
 
-            const userMission = await missionService.userMissionAdd(missionDto.bodyToUserMission(req.body));
+            const userMission = await missionService.userMissionAdd(missionDto.bodyToUserMission(userMissionData));
             res.status(StatusCodes.OK).success({ result: userMission });
         } catch (error) {
             const customError = errorHandler.handle(
