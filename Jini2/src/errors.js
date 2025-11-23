@@ -41,3 +41,15 @@ export class DuplicateError extends Error {
         this.data = data;
     }
 }
+
+// 인증 에러 (Unauthorized)
+export class UnauthorizedError extends Error {
+    errorCode = "AUTH001";
+    statusCode = 401;
+
+    constructor(reason = "인증이 필요합니다. 로그인 후 다시 시도해주세요.", data = null) {
+        super(reason);
+        this.reason = reason;
+        this.data = data;
+    }
+}

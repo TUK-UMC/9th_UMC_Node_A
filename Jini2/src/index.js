@@ -7,7 +7,7 @@ import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 import passport from "passport";
 import { googleStrategy, jwtStrategy } from "./auth.config.js";
-import { handleUserSignUp } from "./controllers/user.controller.js";
+import { handleUserSignUp, handleUpdateProfile } from "./controllers/user.controller.js";
 import { handleCreateStore } from "./controllers/store.controller.js";
 import { handleCreateReview } from "./controllers/review.controller.js";
 import {
@@ -173,20 +173,23 @@ app.get(
 );
 
 
-// 1-1. 특정 지역에 가게 추가하기 API
-app.post("/api/v1/stores", handleCreateStore);
+// 1-1. 특정 지역에 가게 추가하기 API (로그인 필요)
+app.post("/api/v1/stores", isLogin, handleCreateStore);
 
-// 1-2. 가게에 리뷰 추가하기 API
-app.post("/api/v1/stores/:storeId/reviews", handleCreateReview);
+// 1-2. 가게에 리뷰 추가하기 API (로그인 필요)
+app.post("/api/v1/stores/:storeId/reviews", isLogin, handleCreateReview);
 
-// 1-3. 가게에 미션 추가하기 API
-app.post("/api/v1/stores/:storeId/missions", handleCreateMission);
+// 1-3. 가게에 미션 추가하기 API (로그인 필요)
+app.post("/api/v1/stores/:storeId/missions", isLogin, handleCreateMission);
 
-// 1-4. 가게의 미션을 도전 중인 미션에 추가하기 API (미션 도전하기)
-app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
+// 1-4. 가게의 미션을 도전 중인 미션에 추가하기 API (로그인 필요)
+app.post("/api/v1/missions/:missionId/challenge", isLogin, handleChallengeMission);
 
-// 회원가입
+// 회원가입 (로그인 불필요)
 app.post("/api/v1/users/signup", handleUserSignUp);
+
+// 프로필 수정 API (로그인 필요) - Google 로그인 사용자도 추가 정보 입력 가능
+app.patch("/api/v1/users/profile", isLogin, handleUpdateProfile);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어
