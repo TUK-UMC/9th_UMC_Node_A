@@ -3,7 +3,7 @@
 
 ### Custom ###
 # prisma generated files
-/pirsma/migrations/*
+/prisma/migrations/*
 
 ### Node ###
 # Logs
