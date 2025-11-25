@@ -1,5 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
@@ -7,16 +9,13 @@ import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 import passport from "passport";
 import { googleStrategy, jwtStrategy } from "./auth.config.js";
-import { handleUserSignUp, handleUpdateProfile } from "./controllers/user.controller.js";
+import { handleUserSignUp, handleUpdateProfile, handleLogin } from "./controllers/user.controller.js";
 import { handleCreateStore } from "./controllers/store.controller.js";
 import { handleCreateReview } from "./controllers/review.controller.js";
 import {
     handleCreateMission,
     handleChallengeMission,
 } from "./controllers/mission.controller.js";
-
-dotenv.config();
-
 passport.use(googleStrategy);
 passport.use(jwtStrategy);
 
@@ -187,6 +186,9 @@ app.post("/api/v1/missions/:missionId/challenge", isLogin, handleChallengeMissio
 
 // 회원가입 (로그인 불필요)
 app.post("/api/v1/users/signup", handleUserSignUp);
+
+// 로그인 (로그인 불필요)
+app.post("/api/v1/users/login", handleLogin);
 
 // 프로필 수정 API (로그인 필요) - Google 로그인 사용자도 추가 정보 입력 가능
 app.patch("/api/v1/users/profile", isLogin, handleUpdateProfile);

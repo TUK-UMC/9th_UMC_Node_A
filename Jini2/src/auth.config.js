@@ -2,14 +2,14 @@ import dotenv from "dotenv";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { prisma } from "./db/prisma.js";
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import jwt from "jsonwebtoken"; // JWT 생성을 위해 import
+import jwt from "jsonwebtoken";
 
 dotenv.config();
-const secret = process.env.JWT_SECRET; // .env의 비밀 키
+const secret = process.env.JWT_SECRET;
 
 export const generateAccessToken = (user) => {
     return jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.userId || user.id, email: user.email },
         secret,
         { expiresIn: '1h' }
     );
@@ -17,7 +17,7 @@ export const generateAccessToken = (user) => {
 
 export const generateRefreshToken = (user) => {
     return jwt.sign(
-        { id: user.id },
+        { id: user.userId || user.id },
         secret,
         { expiresIn: '14d' }
     );
@@ -51,7 +51,6 @@ const googleVerify = async (profile) => {
 };
 
 // GoogleStrategy
-
 export const googleStrategy = new GoogleStrategy(
     {
         clientID: process.env.PASSPORT_GOOGLE_CLIENT_ID,
@@ -84,14 +83,13 @@ export const googleStrategy = new GoogleStrategy(
 );
 
 const jwtOptions = {
-    // 요청 헤더의 'Authorization'에서 'Bearer <token>' 토큰을 추출
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.JWT_SECRET,
 };
 
 export const jwtStrategy = new JwtStrategy(jwtOptions, async (payload, done) => {
     try {
-        const user = await prisma.user.findFirst({ where: { id: payload.id } });
+        const user = await prisma.user.findFirst({ where: { userId: payload.id } });
 
         if (user) {
             return done(null, user);

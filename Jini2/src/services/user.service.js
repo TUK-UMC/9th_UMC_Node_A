@@ -7,8 +7,10 @@ import {
     setPreference,
     updateUser,
     clearUserPreferences,
+    getUserByEmail,
 } from "../repositories/user.repository.js";
 import { DuplicateUserEmailError, NotFoundError } from "../errors.js";
+import { generateAccessToken, generateRefreshToken } from "../auth.config.js";
 
 export const userSignUp = async (data) => {
     // 소셜 로그인이 아닌 경우에만 비밀번호 해싱
@@ -42,6 +44,37 @@ export const userSignUp = async (data) => {
     const preferences = await getUserPreferencesByUserId(joinUserId);
 
     return responseFromUser({ user, preferences });
+};
+
+// 로그인 서비스
+export const userLogin = async (email, password) => {
+    // 이메일로 사용자 찾기
+    const user = await getUserByEmail(email);
+    
+    if (!user) {
+        throw new NotFoundError("존재하지 않는 이메일입니다.", { email });
+    }
+
+    // 비밀번호 확인
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+        throw new Error("비밀번호가 일치하지 않습니다.");
+    }
+
+    // JWT 토큰 생성
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    return {
+        accessToken,
+        refreshToken,
+        user: {
+            userId: user.userId,
+            email: user.email,
+            name: user.name
+        }
+    };
 };
 
 // 프로필 수정 서비스 (로그인한 사용자가 자신의 정보를 수정)

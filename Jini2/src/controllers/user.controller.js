@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser, bodyToUserUpdate } from "../dtos/user.dto.js";
-import { userSignUp, userUpdateProfile } from "../services/user.service.js";
+import { userSignUp, userUpdateProfile, userLogin } from "../services/user.service.js";
 
 export const handleUserSignUp = async (req, res, next) => {
     try {
@@ -10,6 +10,20 @@ export const handleUserSignUp = async (req, res, next) => {
         const user = await userSignUp(bodyToUser(req.body));
 
         res.status(StatusCodes.OK).success(user);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const handleLogin = async (req, res, next) => {
+    try {
+        console.log("로그인을 요청했습니다!");
+        console.log("body:", req.body);
+
+        const { email, password } = req.body;
+        const result = await userLogin(email, password);
+
+        res.status(StatusCodes.OK).success(result);
     } catch (err) {
         next(err);
     }
