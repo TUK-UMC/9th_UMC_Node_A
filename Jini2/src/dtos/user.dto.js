@@ -17,6 +17,22 @@ export const bodyToUser = (body) => {
     };
 };
 
+// 프로필 수정용 body 변환
+export const bodyToUserUpdate = (body) => {
+    const birth = body.birth ? new Date(body.birth) : undefined;
+
+    return {
+        name: body.name,
+        gender: body.gender,
+        birth,
+        address: body.address || "",
+        detailAddress: body.detailAddress || "",
+        phoneNumber: body.phoneNumber,
+        password: body.password, // 비밀번호 변경시에만 존재
+        preferences: body.preferences || [],
+    };
+};
+
 // DB 데이터를 응답 형식으로 변환 (출력용)
 export const responseFromUser = ({ user, preferences }) => {
     const userInfo = Array.isArray(user) ? user[0] : user;

@@ -1,0 +1,207 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "UMC 9th Node.js API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/users/signup": {
+      "post": {
+        "summary": "회원가입 (로그인 불필요)",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "name", "gender", "birth", "phoneNumber", "preferences"],
+                "properties": {
+                  "email": { "type": "string", "example": "user@example.com" },
+                  "name": { "type": "string", "example": "홍길동" },
+                  "gender": { "type": "string", "example": "male" },
+                  "birth": { "type": "string", "example": "2000-01-01" },
+                  "address": { "type": "string", "example": "서울시 강남구" },
+                  "detailAddress": { "type": "string", "example": "123-45" },
+                  "phoneNumber": { "type": "string", "example": "010-1234-5678" },
+                  "password": { "type": "string", "example": "password123" },
+                  "preferences": { "type": "array", "items": { "type": "number" }, "example": [1, 2, 3] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "회원가입 성공" },
+          "400": { "description": "U001: 이미 존재하는 이메일" }
+        }
+      }
+    },
+    "/api/v1/users/profile": {
+      "patch": {
+        "summary": "프로필 수정 (로그인 필요)",
+        "tags": ["User"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "홍길동" },
+                  "gender": { "type": "string", "example": "male" },
+                  "birth": { "type": "string", "example": "2000-01-01" },
+                  "address": { "type": "string", "example": "서울시 강남구" },
+                  "detailAddress": { "type": "string", "example": "123-45" },
+                  "phoneNumber": { "type": "string", "example": "010-1234-5678" },
+                  "password": { "type": "string", "example": "newPassword123" },
+                  "preferences": { "type": "array", "items": { "type": "number" }, "example": [1, 2, 3] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "프로필 수정 성공" },
+          "401": { "description": "AUTH001: 인증 필요" }
+        }
+      }
+    },
+    "/api/v1/stores": {
+      "post": {
+        "summary": "가게 추가 (로그인 필요)",
+        "tags": ["Store"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "regionName", "address"],
+                "properties": {
+                  "name": { "type": "string", "example": "맛있는 식당" },
+                  "regionName": { "type": "string", "example": "강남구" },
+                  "address": { "type": "string", "example": "서울시 강남구 테헤란로 123" },
+                  "description": { "type": "string", "example": "맛있는 한식 전문점" },
+                  "status": { "type": "string", "example": "active" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "가게 추가 성공" },
+          "401": { "description": "AUTH001: 인증 필요" }
+        }
+      }
+    },
+    "/api/v1/stores/{storeId}/reviews": {
+      "post": {
+        "summary": "리뷰 작성 (로그인 필요)",
+        "tags": ["Review"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rating"],
+                "properties": {
+                  "rating": { "type": "number", "example": 4.5 },
+                  "content": { "type": "string", "example": "음식이 매우 맛있었습니다!" },
+                  "imageUrls": { "type": "array", "items": { "type": "string" }, "example": ["http://example.com/image1.jpg"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "리뷰 추가 성공" },
+          "401": { "description": "AUTH001: 인증 필요" },
+          "404": { "description": "COMMON001: 존재하지 않는 가게" }
+        }
+      }
+    },
+    "/api/v1/stores/{storeId}/missions": {
+      "post": {
+        "summary": "미션 추가 (로그인 필요)",
+        "tags": ["Mission"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rewardPoint", "title"],
+                "properties": {
+                  "rewardPoint": { "type": "number", "example": 1000 },
+                  "title": { "type": "string", "example": "리뷰 3개 작성하기" },
+                  "description": { "type": "string", "example": "리뷰를 3개 이상 작성하면 마일리지 지급" },
+                  "bossCode": { "type": "string", "example": "BOSS2024" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "미션 추가 성공" },
+          "401": { "description": "AUTH001: 인증 필요" },
+          "404": { "description": "COMMON001: 존재하지 않는 가게" }
+        }
+      }
+    },
+    "/api/v1/missions/{missionId}/challenge": {
+      "post": {
+        "summary": "미션 도전 (로그인 필요)",
+        "tags": ["Mission"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "missionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "미션 도전 성공" },
+          "401": { "description": "AUTH001: 인증 필요" },
+          "404": { "description": "COMMON001: 존재하지 않는 미션" },
+          "409": { "description": "COMMON003: 이미 도전 중인 미션" }
+        }
+      }
+    }
+  }
+}
