@@ -3,17 +3,14 @@
 import { responseFromStore, previewReviewResponseDTO } from "../dtos/store.dto.js"; 
 import { addStore, getStore, getAllStoreReviews } from "../repositories/store.repository.js";
 
-// [추가] 커스텀 에러 클래스 import
 import { ResourceNotFoundError, InvalidInputError } from "../errors.js"; 
 
-
-// [수정] listStoreReviews: 커서 기반 페이지네이션 로직 적용
 export const listStoreReviews = async (storeId, cursor) => {
   
   // 1. Repository 호출 (cursor 인자 전달)
   const reviews = await getAllStoreReviews(storeId, cursor); 
   
-  // 2. 다음 커서 값 계산 로직 적용 (take: 5 기준)
+  // 2. 다음 커서 값 계산 로직 적용
   // take 개수와 리뷰 개수가 같으면, 다음 커서를 설정합니다.
   const nextCursor = (reviews.length === 5) 
       ? reviews[reviews.length - 1].id 

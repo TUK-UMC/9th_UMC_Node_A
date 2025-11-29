@@ -1,10 +1,9 @@
-// src/repositories/store.repository.js (수정)
+// src/repositories/store.repository.js
 
 import { prisma } from "../db.config.js"; // prisma 객체만 남김
 
 // 새로운 가게 데이터를 삽입 (addStore)
 export const addStore = async (data) => {
-  // const conn = await pool.getConnection(); // 제거
   
   try {
     const newStore = await prisma.store.create({

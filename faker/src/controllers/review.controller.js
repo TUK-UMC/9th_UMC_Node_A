@@ -62,17 +62,16 @@ export const handleReviewRegister = async (req, res, next) => {
 */
   try {
     // 1. Path Parameter에서 storeId 획득 (숫자형으로 변환)
-    const storeId = parseInt(req.params.storeId, 10);
-    
-    console.log(`가게 ID ${storeId}에 리뷰 등록을 요청했습니다!`);
-    console.log("body:", req.body);
+    const storeId = parseInt(req.params.storeId, 10)
+
+    const userId = req.user.id;
     
     // 2. DTO를 이용해 요청 본문을 Service용 객체로 변환
     const reviewData = bodyToReview(req.body);
     
     // 3. Service 호출 및 등록된 리뷰 정보 받기
-    const review = await registerReview(storeId, reviewData); 
-    
+    const review = await registerReview(userId, storeId, reviewData);
+
     res.status(StatusCodes.CREATED).json({ 
         message: "리뷰가 성공적으로 등록되었습니다.",
         result: review 
@@ -80,10 +79,6 @@ export const handleReviewRegister = async (req, res, next) => {
 
   } catch (error) {
     // 에러 핸들링
-    res.status(StatusCodes.BAD_REQUEST).json({ 
-        isSuccess: false,
-        code: StatusCodes.BAD_REQUEST,
-        message: error.message 
-    });
+    next(error);
   }
 };
