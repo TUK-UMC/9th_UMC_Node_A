@@ -2,226 +2,167 @@
 
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-
-// ============== 1. 기본 모듈 및 미들웨어 임포트 ==============
 import express from 'express';
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from 'cookie-parser'; 
-import morgan from 'morgan'; 
-
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import passport from "passport";
-import { googleStrategy, jwtStrategy } from "./auth.config.js";
-import { prisma } from "./db.config.js";
 
-import { generateAccessToken } from "./auth.config.js";
+// Auth
+import { initializePassport } from "./auth/index.js";
+import { handleGoogleLogin } from "./auth/auth.service.js"; 
 
-passport.use(googleStrategy);
-passport.use(jwtStrategy); 
-
-// ============== 2. 컨트롤러 임포트 (기존 미션 코드) ==============
+// Controllers
 import { handleUserSignUp, handleListUserReviews, handleUserUpdate } from "./controllers/user.controller.js";
 import { handleStoreRegister, handleListStoreReviews } from "./controllers/store.controller.js";
 import { handleReviewRegister } from "./controllers/review.controller.js";
 import { handleMissionRegister, handleListStoreMissions } from "./controllers/mission.controller.js";
 import { handleMissionChallenge, handleListChallengingMissions } from "./controllers/user_mission.controller.js";
 
+// 테스트 컨트롤러 Import
+import { handleTest, handleSetCookie, handleGetCookie, handleGenerateTestToken } from "./controllers/test.controller.js";
 
-// ============== 3. 환경 설정 및 앱 초기화 ==============
 dotenv.config();
 
 const app = express();
-// 환경 변수에 포트가 없으면 3000번을 기본값으로 사용
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3000;
+
+// 1. 공통 응답 헬퍼
+app.use((req, res, next) => {
+  res.success = (success) => {
+    return res.json({ resultType: "SUCCESS", error: null, success });
+  };
+  res.error = ({ errorCode = "unknown", reason = null, data = null }) => {
+    return res.json({
+      resultType: "FAIL",
+      error: { errorCode, reason, data },
+      success: null,
+    });
+  };
+  next();
+});
+
+// 2. 전역 미들웨어
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(cors());
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// 3. Passport 설정
+app.use(passport.initialize());
+initializePassport(); 
 
 const authMiddleware = passport.authenticate('jwt', { session: false });
 
 
-// ============== 4. 응답 헬퍼 함수 등록 ==============
-app.use((req, res, next) => {
-    // 성공 응답 헬퍼
-    res.success = (success) => {
-      return res.json({ resultType: "SUCCESS", error: null, success });
-    };
-
-    // 실패/오류 응답 헬퍼
-    res.error = ({ errorCode = "unknown", reason = null, data = null }) => {
-      return res.json({
-        resultType: "FAIL",
-        error: { errorCode, reason, data },
-        success: null,
-      });
-    };
-
-    next();
-});
+// 4. 테스트용 라우트 (Controller로 분리)
+app.get('/', handleTest);
+app.get('/test', handleTest);
+app.get('/setcookie', handleSetCookie);
+app.get('/getcookie', handleGetCookie);
+app.get('/test/token/:userId', handleGenerateTestToken);
 
 
-// ============== 5. 전역 미들웨어 등록 ==============
-app.use(morgan('dev')); 
-app.use(cookieParser()); 
-
-app.use(cors()); // cors 방식 허용
-app.use(express.static("public"));  // 정적 파일 접근 
-app.use(express.json());  // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)
-app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-
-app.use(passport.initialize());
-
-passport.use(googleStrategy);
-passport.use(jwtStrategy);
-
-
-// ============== 6. 인증 미들웨어 및 뷰 테스트 라우트 ==============
-
-const isLogin = passport.authenticate('jwt', { session: false });
-
-app.get('/mypage', isLogin, (req, res) => {
-  res.status(200).success({
-    message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
-    user: req.user,
-  });
-});
-
-app.get('/', (req, res) => { res.send(`<h1>메인 페이지</h1>...`); });
-app.get('/login', (req, res) => { res.send('<h1>로그인 페이지</h1>...'); });
-app.get('/mypage', isLogin, (req, res) => { res.send(`<h1>마이페이지</h1>...`); });
-app.get('/set-login', (req, res) => {
-    res.cookie('username', 'UMC9th', { maxAge: 3600000 }); 
-    res.send('로그인 쿠키 생성 완료! <a href="/mypage">마이페이지로 이동</a>');
-});
-app.get('/set-logout', (req, res) => {
-    res.clearCookie('username'); 
-    res.send('로그아웃 완료 (쿠키 삭제). <a href="/">메인으로</a>');
-});
-app.get('/test', (req, res) => { res.send('Hello!'); });
-app.get('/setcookie', (req, res) => {
-    res.cookie('myCookie', 'hello', { maxAge: 60000 });
-    res.send('쿠키가 생성되었습니다!');
-});
-app.get('/getcookie', (req, res) => {
-    const myCookie = req.cookies.myCookie; 
-    res.send(myCookie ? `당신의 쿠키: ${myCookie}` : '쿠키가 없습니다.');
-});
-
-
-// ============== 7. Swagger 문서 설정 ==============
-
-// 1. Swagger UI 렌더링을 위한 라우트 설정
+// 5. Swagger 설정
 app.use(
-    "/docs",
-    swaggerUiExpress.serve,
-    swaggerUiExpress.setup({}, {
-      swaggerOptions: {
-        url: "/openapi.json", // UI가 이 엔드포인트에서 생성된 문서를 가져오도록 설정
-      },
-    })
+  "/docs",
+  swaggerUiExpress.serve,
+  swaggerUiExpress.setup({}, {
+    swaggerOptions: {
+      url: "/openapi.json",
+    },
+  })
 );
 
-// 2. swagger-autogen을 이용해 동적으로 OpenAPI JSON 문서를 생성하는 라우트
 app.get("/openapi.json", async (req, res, next) => {
-    // #swagger.ignore = true (이 라우트 자체는 문서화에서 제외)
-    const options = {
-        openapi: "3.0.0",
-        disableLogs: true,
-        writeOutputFile: false,
-    };
-    const outputFile = "/dev/null"; // 파일 출력은 사용하지 않음
-    const routes = ["./src/index.js"]; // 스캔할 라우트 파일 목록
-    const doc = {
-        info: {
-            title: "UMC 9th",
-            description: "UMC 9th Node.js 테스트 프로젝트입니다.",
-        },
-        host: "localhost:3000",
-    };
-
-    try {
-      const result = await swaggerAutogen(options)(outputFile, routes, doc);
-      res.json(result ? result.data : null);
-    } catch (error) {
-      console.error("Swagger 문서 생성 오류:", error);
-      res.status(500).json({ error: "문서 생성 중 오류가 발생했습니다." });
+  const options = {
+    openapi: "3.0.0",
+    disableLogs: true,
+    writeOutputFile: false,
+  };
+  const outputFile = "/dev/null";
+  const routes = ["./src/index.js"];
+  const doc = {
+    info: {
+      title: "UMC 9th",
+      description: "UMC 9th Node.js 테스트 프로젝트입니다.",
+    },
+    host: "localhost:3000",
+    definitions: {
+        ResourceNotFoundError: {
+            resultType: "FAIL",
+            error: { errorCode: "G001", reason: "Resource not found", data: null },
+            success: null
+        }
     }
+  };
+  const result = await swaggerAutogen(options)(outputFile, routes, doc);
+  res.json(result ? result.data : null);
 });
 
 
-// ============== 8. API 라우트 ==============
-app.post("/api/v1/users/signup", handleUserSignUp); // 회원가입 엔드포인트 처리기
+// 6. API 라우트 등록
 
-app.post("/api/v1/stores",authMiddleware, handleStoreRegister);  // 가게 등록 엔드포인트 처리기
+// User
+app.post("/api/v1/users/signup", handleUserSignUp);
+app.patch("/api/v1/users", authMiddleware, handleUserUpdate); 
 
-app.post("/api/v1/stores/:storeId/reviews", authMiddleware,handleReviewRegister); // 리뷰 등록 엔드포인트 처리기
+// Store
+app.post("/api/v1/stores", authMiddleware, handleStoreRegister); 
+app.post("/api/v1/stores/:storeId/reviews", authMiddleware, handleReviewRegister); 
+app.post("/api/v1/stores/:storeId/missions", authMiddleware, handleMissionRegister); 
 
-app.post("/api/v1/stores/:storeId/missions",authMiddleware, handleMissionRegister); // 미션 등록 엔드포인트 처리기
+// Mission
+app.post("/api/v1/missions/:missionId/challenge", authMiddleware, handleMissionChallenge); 
 
-app.post("/api/v1/missions/:missionId/challenge", authMiddleware,handleMissionChallenge); // 미션 챌린지 엔드포인트 처리기
+// 조회 (GET)
+app.get("/api/v1/users/missions", authMiddleware, handleListChallengingMissions);
+app.get("/api/v1/users/reviews", authMiddleware, handleListUserReviews);
+app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
+app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions);
 
-app.get("/api/v1/users/:userId/missions", handleListChallengingMissions); // 도전 중 미션 목록 조회 API 
 
-app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews); // 가게 리뷰 목록 조회 엔드포인트 처리기
+// 7. 구글 OAuth2 라우트
+app.get("/oauth2/login/google", passport.authenticate("google", { session: false, scope: ["email", "profile"] }));
 
-app.get("/api/v1/users/:userId/reviews", handleListUserReviews);
+app.get(
+  "/oauth2/callback/google",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login-failed",
+  }),
+  async (req, res, next) => {
+    try {
+      const googleProfile = req.user;
+      const { user, tokens } = await handleGoogleLogin(googleProfile);
 
-app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions); // 미션 목록 조회 API 추가
+      res.status(200).success({
+        message: "Google 로그인 성공!",
+        user: { id: user.id, email: user.email, name: user.name },
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-app.patch("/api/v1/users", authMiddleware, handleUserUpdate);
-// ============== 9. 전역 오류 처리 미들웨어 (에러 핸들링 핵심) ==============
-// 에러 핸들링 미들웨어는 항상 다른 라우트와 미들웨어 뒤에 위치
+// 8. 전역 에러 핸들러
 app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  // 정의된 헬퍼 함수를 사용하여 통일된 오류 응답 포맷을 반환
-  res.status(err.statusCode || 500).error({
-    errorCode: err.errorCode || "UNKNOWN_ERROR",
-    reason: err.reason || err.message || "서버에서 예상치 못한 오류가 발생했습니다.",
-    data: err.data || null,
-  });
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(err.statusCode || 500).error({
+    errorCode: err.errorCode || "UNKNOWN_ERROR",
+    reason: err.reason || err.message || "서버에서 예상치 못한 오류가 발생했습니다.",
+    data: err.data || null,
+  });
 });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
-});
-
-
-// ============== 10. 구글 OAuth2 로그인 라우트 ==============
-
-app.get("/oauth2/login/google", 
-  passport.authenticate("google", { 
-    session: false 
-  })
-);
-app.get(
-  "/oauth2/callback/google",
-  passport.authenticate("google", {
-	  session: false,
-    failureRedirect: "/login-failed",
-  }),
-  (req, res) => {
-    const tokens = req.user; 
-
-    res.status(200).json({
-      resultType: "SUCCESS",
-      error: null,
-      success: {
-          message: "Google 로그인 성공!",
-          tokens: tokens, // { "accessToken": "...", "refreshToken": "..." }
-      }
-    });
-  }
-);
-
-
-app.get('/test/token/:userId', (req, res) => {
-    const userId = parseInt(req.params.userId, 10);
-    // 임시 유저 정보로 토큰 생성
-    const token = generateAccessToken({ id: userId, email: "test@example.com" });
-    
-    // res.success 헬퍼를 이용해 응답
-    res.success({ 
-        message: `${userId}번 유저의 토큰이 발급되었습니다.`,
-        token: token 
-    });
 });

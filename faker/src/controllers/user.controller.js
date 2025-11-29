@@ -2,9 +2,7 @@
 
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser } from "../dtos/user.dto.js";
-import { userSignUp,
-  listUserReviews, updateUserInfo
-} from "../services/user.service.js";
+import { userSignUp,listUserReviews, updateUserInfo } from "../services/user.service.js";
 export const handleUserSignUp = async (req, res, next) => {
   /*
     #swagger.summary = '회원 가입 API';
@@ -89,10 +87,6 @@ export const handleUserSignUp = async (req, res, next) => {
     next(error); 
   }
 };
-
-
-
-// GET /api/v1/users/:userId/reviews 요청 처리
  
 export const handleListUserReviews = async (req, res, next) => {
 /*
@@ -141,20 +135,17 @@ export const handleListUserReviews = async (req, res, next) => {
   }
 */
   try {
-    const userId = parseInt(req.params.userId, 10);
+    // 인증 미들웨어를 통과한 유저의 ID를 사용
+    const userId = req.user.id;
     
-    // Service 계층 호출
     const reviews = await listUserReviews(userId);
 
-    // 통일된 성공 헬퍼 함수 사용 (res.success)
     res.status(StatusCodes.OK).success(reviews);
     
   } catch (err) {
-    // 오류 발생 시 next(err)를 호출
     next(err); 
   }
 };
-
 
 /*
   #swagger.summary = '사용자 정보 수정 API';
@@ -202,7 +193,7 @@ export const handleListUserReviews = async (req, res, next) => {
 */
 export const handleUserUpdate = async (req, res, next) => {
   try {
-    // 인증 미들웨어를 거쳤다면 req.user에 사용자 정보가 있습니다.
+    // 인증 미들웨어를 거쳤다면 req.user에 사용자 정보가 있음.
     const userId = req.user.id; 
     
     const updatedUser = await updateUserInfo(userId, req.body);
