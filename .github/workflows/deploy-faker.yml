@@ -31,6 +31,8 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+            export BACKEND_ENV="${{ secrets.BACKEND_ENV }}" #echo로만 안될때 사용
+
             #프로젝트 root로 이동
             cd faker/faker
 
@@ -38,7 +40,6 @@ jobs:
             git pull origin main
             
             # env 파일 생성
-            export BACKEND_ENV="${{ secrets.BACKEND_ENV }}" #echo로만 안될때 사용
             echo "${BACKEND_ENV}" > .env
 
             # 종속성 설치
