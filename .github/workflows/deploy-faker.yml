@@ -35,7 +35,7 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             #프로젝트 root로 이동
-            cd /home/ubuntu/faker
+            cd /home/ubuntu/faker/faker
 
             # pull 받아오기
             git pull origin main
