@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { challengeMission, listChallengingMissions } from "../services/user_mission.service.js"; // 새 Service 함수 import
 
 export const handleMissionChallenge = async (req, res, next) => {
-  /*
+/*
 #swagger.summary = '미션 도전 API';
 #swagger.description = '특정 미션에 도전을 시작합니다. (사용자 ID는 Service에서 가정)';
 #swagger.parameters['missionId'] = {
@@ -47,11 +47,10 @@ export const handleMissionChallenge = async (req, res, next) => {
   try {
     // 1. Path Parameter에서 missionId 획득 (숫자형으로 변환)
     const missionId = parseInt(req.params.missionId, 10);
-    
-    console.log(`미션 ID ${missionId} 도전을 요청했습니다!`);
-    
+    const userId = req.user.id;
+
     // 2. Service 호출 및 미션 도전 정보 받기
-    const userMission = await challengeMission(missionId); 
+    const userMission = await challengeMission(userId,missionId); 
     
     res.status(StatusCodes.CREATED).json({ 
         message: "미션 도전을 시작합니다.",
@@ -60,16 +59,12 @@ export const handleMissionChallenge = async (req, res, next) => {
 
   } catch (error) {
     // 에러 핸들링
-    res.status(StatusCodes.BAD_REQUEST).json({ 
-        isSuccess: false,
-        code: StatusCodes.BAD_REQUEST,
-        message: error.message 
-    });
+    next(error);
   }
 };
 
 export const handleListChallengingMissions = async (req, res, next) => {
-  /*
+/*
 #swagger.summary = '사용자 도전 중인 미션 목록 조회';
 #swagger.description = '특정 사용자가 현재 도전 중인 미션 목록을 조회합니다.';
 #swagger.parameters['userId'] = {
@@ -105,20 +100,14 @@ export const handleListChallengingMissions = async (req, res, next) => {
 }
 */
   try {
-    const userId = parseInt(req.params.userId, 10);
+    // 인증 미들웨어를 통과한 유저의 ID를 사용
+    const userId = req.user.id;
     
     const missions = await listChallengingMissions(userId);
     
-    res.status(StatusCodes.OK).json({
-        message: `${userId}번 사용자의 도전 중인 미션 목록 조회 성공`,
-        data: missions
-    });
+    res.status(StatusCodes.OK).success(missions);
 
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ 
-        isSuccess: false,
-        code: StatusCodes.BAD_REQUEST,
-        message: error.message 
-    });
+    next(error);
   }
 };

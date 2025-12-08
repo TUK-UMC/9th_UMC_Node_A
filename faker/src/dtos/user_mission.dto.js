@@ -11,15 +11,14 @@ export const responseFromUserMission = (userMission) => {
   };
 };
 
-/**
- * 도전 중인 미션 목록 데이터를 응답 형식에 맞게 가공합니다.
- */
+// 도전 중인 미션 목록 데이터를 응답 형식에 맞게 변환
+ 
 export const responseFromUserMissionsList = (userMissions) => {
     return userMissions.map(um => ({
         userMissionId: um.id,
         missionStatus: um.status,
         
-        // Mission 상세 정보 추출 (um.mission 객체에서 가져옴)
+        // Mission 상세 정보 추출
         mission: {
             missionId: um.mission.id,
             storeId: um.mission.storeId,

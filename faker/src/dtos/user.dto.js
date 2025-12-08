@@ -14,14 +14,13 @@ export const bodyToUser = (body) => {
   };
 };
 
-/**
- * Service에서 받은 사용자 정보(user)와 선호 카테고리 리스트(preferences)를 
- * 클라이언트 응답 형식에 맞게 변환합니다.
+/*
+  Service에서 받은 사용자 정보(user)와 선호 카테고리 리스트(preferences)를 
+  클라이언트 응답 형식에 맞게 변환합니다.
  */
 export const responseFromUser = ({ user, preferences }) => {
   
   // 1. 선호 카테고리 배열에서 이름만 추출하여 문자열 배열로 변환
-  // [수정 반영] Prisma의 JOIN 결과 구조 (preference.foodCategory.name)에 맞게 수정
   const preferFoods = preferences.map(preference => 
     preference.category.name // Repository에서 category: { select: { name: true } } 로 가져왔다고 가정
   ); 
@@ -32,8 +31,6 @@ export const responseFromUser = ({ user, preferences }) => {
     email: user.email,
     name: user.name,
     gender: user.gender,
-    // age 필드는 DB에 없거나 DTO에서 누락될 수 있으므로, 일단 제거하거나 유효성 검사 필요
-    // age: user.age, 
     
     // Prisma 스키마 필드 이름(address) 사용
     address: user.address, 
@@ -46,13 +43,13 @@ export const responseFromUser = ({ user, preferences }) => {
     preferCategory: preferFoods,
     
     // 생성/수정일 정보는 Date 객체를 ISO 문자열로 변환하여 제공
-    createdAt: user.createdAt, // Prisma는 created_at을 createdAt으로 변환할 수 있습니다.
+    createdAt: user.createdAt, // Prisma는 created_at을 createdAt으로 변환 하여 제공
     updatedAt: user.updatedAt,
   };
 };
 
-/**
- * 사용자가 작성한 리뷰 목록 데이터를 응답 형식에 맞게 가공합니다.
+/*
+ * 사용자가 작성한 리뷰 목록 데이터를 응답 형식에 맞게 가공
  * @param {Array<object>} reviews - Prisma로 조회된 리뷰 데이터 (store 포함)
  * @returns {Array<object>} 클라이언트 응답용 리뷰 배열
  */
@@ -69,7 +66,22 @@ export const responseFromUserReviews = (reviews) => {
             storeName: review.store.name,
             storeAddress: review.store.address,
             storeRating: review.store.rating,
-            // ... (필요한 다른 가게 필드)
         }
     }));
+};
+
+// 회원 정보 수정 요청 Body를 DB 업데이트용 객체로 변환
+ 
+export const bodyToUserUpdate = (body) => {
+  const birth = body.birth ? new Date(body.birth) : undefined;
+
+  return {
+    name: body.name,
+    gender: body.gender,
+    birth,
+    address: body.address,
+    detailAddress: body.detailAddress,
+    phoneNumber: body.phoneNumber,
+    // preferences 등 다른 필드도 필요하면 추가 가능
+  };
 };

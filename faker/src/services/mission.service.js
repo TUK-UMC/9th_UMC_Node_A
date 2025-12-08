@@ -6,7 +6,7 @@ import { responseFromMission } from "../dtos/mission.dto.js";
 
 import { getMissionsByStoreId } from "../repositories/mission.repository.js"; 
 
-/**
+/*
  * 특정 가게 ID로 미션 목록을 조회하는 Service 함수
  * @param {number} storeId - 가게 ID
  * @returns {Array} 가공된 미션 목록 데이터

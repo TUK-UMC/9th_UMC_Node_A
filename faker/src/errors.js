@@ -1,8 +1,7 @@
 // src/errors.js
 
-/**
- * [추가] 모든 커스텀 오류의 기본 클래스로, 공통 속성을 정의합니다.
- */
+// [추가] 모든 커스텀 오류의 기본 클래스로, 공통 속성을 정의합니다.
+ 
 class BaseError extends Error {
     constructor(reason, statusCode = 500, errorCode = "UNKNOWN_ERROR", data) {
         super(reason);
@@ -19,21 +18,19 @@ class BaseError extends Error {
     }
 }
 
-/**
+/*
  * [U001] 회원가입 시 이메일 중복 오류
  * (BaseError를 상속받아 일관성 확보)
  */
 export class DuplicateUserEmailError extends BaseError {
     constructor(reason, data) {
-        // super()를 호출하여 BaseError의 속성을 설정합니다.
+        // super()를 호출하여 BaseError의 속성을 설정
         // 상태 코드 409 (Conflict), 에러 코드 "U001"
         super(reason, 409, "U001", data); 
     }
 }
 
-// ===============================================
-// [참고] 향후 확장성을 위해 추가할 수 있는 다른 에러 클래스들
-// ===============================================
+// 추가할 수 있는 다른 에러 클래스들
 
 // [G001] 리소스를 찾을 수 없는 일반적인 오류 (404 Not Found)
 export class ResourceNotFoundError extends BaseError {
