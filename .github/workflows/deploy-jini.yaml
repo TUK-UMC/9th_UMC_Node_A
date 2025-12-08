@@ -31,10 +31,10 @@ jobs:
 
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY_JINI" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          ssh -o StrictHostKeyChecking=no $EC2_USER_JINI@$EC2_HOST_JINI << 'EOF'
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
            #프로젝트 root로 이동
             cd /home/ubuntu/umc_study/Jini2
 
@@ -43,7 +43,7 @@ jobs:
           
             # env 파일 생성
             export BACKEND_ENV="${{ secrets.BACKEND_ENV_JINI }}" #echo로만 안될때 사용
-            echo "${BACKEND_ENV_JINI}" > .env
+            echo "${BACKEND_ENV}" > .env
 
             # 종속성 설치
             npm install
