@@ -49,6 +49,6 @@ jobs:
             npx prisma migrate deploy
 
             # 앱 재시작 - 변경사항 반영
-            pm2 reload all || pm2 start index.js --name "faker"
+            pm2 reload all || pm2 start src/index.js --name "faker"
             pm2 status #확인용
           EOF
