@@ -19,6 +19,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
+        working-directory: ./Jini2
         run: npm install
 
       - name: Connect & Deploy to EC2
@@ -26,14 +27,14 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_JINI }}
           EC2_HOST: ${{ secrets.EC2_HOST_JINI }}
           EC2_USER: ${{ secrets.EC2_USER_JINI }}
-          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV_JINI }}
 
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY_JINI" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          ssh -o StrictHostKeyChecking=no $EC2_USER_JINI@$EC2_HOST_JINI << 'EOF'
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
            #프로젝트 root로 이동
             cd /home/ubuntu/umc_study/Jini2
 
