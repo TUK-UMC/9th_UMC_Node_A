@@ -31,7 +31,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-            export BACKEND_ENV="${{ secrets.BACKEND_ENV }}" #echo로만 안될때 사용
+            export BACKEND_ENV="${{ secrets.BACKEND_ENV_FAKER }}" #echo로만 안될때 사용
 
             #프로젝트 root로 이동
             cd faker/faker
