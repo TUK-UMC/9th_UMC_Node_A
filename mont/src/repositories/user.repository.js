@@ -46,6 +46,24 @@ class userRepository {
 
     return preferences;
     };
+
+    // 사용자 정보 업데이트
+    async updateUser(userId, data) {
+        // undefined 값 제거 (업데이트하지 않을 필드)
+        const updateData = {};
+        Object.keys(data).forEach(key => {
+            if (data[key] !== undefined) {
+                updateData[key] = data[key];
+            }
+        });
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+        });
+
+        return updatedUser;
+    };
 }
 
 export default new userRepository();

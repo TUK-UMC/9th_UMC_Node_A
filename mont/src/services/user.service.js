@@ -29,6 +29,19 @@ class userService {
 
     return userDto.responseFromUser(joinUser, preferences); // 유저 객체(ID 아님)와 선호 카테고리 전달
   }
+
+  async updateProfile(userId, data) {
+    const updatedUser = await userRepo.updateUser(userId, {
+      name: data.name,
+      gender: data.gender,
+      birth: data.birth ? new Date(data.birth) : undefined,
+      address: data.address,
+      detailAddress: data.detailAddress,
+      phoneNumber: data.phoneNumber,
+    });
+
+    return updatedUser;
+  }
 }
 
 export default new userService();
