@@ -1,19 +1,23 @@
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-import { handleUserSignUp } from "./controllers/user.controller.js";
+import passport from "passport";
+import { googleStrategy, jwtStrategy } from "./auth.config.js";
+import { handleUserSignUp, handleUpdateProfile, handleLogin } from "./controllers/user.controller.js";
 import { handleCreateStore } from "./controllers/store.controller.js";
 import { handleCreateReview } from "./controllers/review.controller.js";
 import {
     handleCreateMission,
     handleChallengeMission,
 } from "./controllers/mission.controller.js";
-
-dotenv.config();
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
 
 const app = express();
 const port = process.env.PORT;
@@ -43,6 +47,7 @@ app.use(express.json()); // request의 본문을 json으로 해석할 수 있도
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
 app.use(morgan("dev"));
 app.use(cookieParser());
+app.use(passport.initialize());
 
 app.use(
     "/docs",
@@ -54,20 +59,14 @@ app.use(
     })
 );
 
-const isLogin = (req, res, next) => {
-    // cookie-parser가 만들어준 req.cookies 객체에서 username을 확인
-    const { username } = req.cookies;
+const isLogin = passport.authenticate('jwt', { session: false });
 
-    if (username) {
-
-        console.log(`[인증 성공] ${username}님, 환영합니다.`);
-        next();
-    } else {
-
-        console.log('[인증 실패] 로그인이 필요합니다.');
-        res.status(401).send('<script>alert("로그인이 필요합니다!");location.href="/login";</script>');
-    }
-};
+app.get('/mypage', isLogin, (req, res) => {
+    res.status(200).success({
+        message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
+        user: req.user,
+    });
+});
 
 
 app.get('/test', (req, res) => {
@@ -113,15 +112,6 @@ app.get('/login', (req, res) => {
 });
 
 
-app.get('/mypage', isLogin, (req, res) => {
-    res.send(`
-        <h1>마이페이지</h1>
-        <p>환영합니다, ${req.cookies.username}님!</p>
-        <p>이 페이지는 로그인한 사람만 볼 수 있습니다.</p>
-    `);
-});
-
-
 app.get('/set-login', (req, res) => {
     res.cookie('username', 'UMC9th', { maxAge: 3600000 });
     res.send('로그인 쿠키(username=UMC9th) 생성 완료! <a href="/mypage">마이페이지로 이동</a>');
@@ -156,20 +146,52 @@ app.get("/openapi.json", async (req, res, next) => {
 });
 
 
-// 1-1. 특정 지역에 가게 추가하기 API
-app.post("/api/v1/stores", handleCreateStore);
+app.get("/oauth2/login/google",
+    passport.authenticate("google", {
+        session: false
+    })
+);
+app.get(
+    "/oauth2/callback/google",
+    passport.authenticate("google", {
+        session: false,
+        failureRedirect: "/login-failed",
+    }),
+    (req, res) => {
+        const tokens = req.user;
 
-// 1-2. 가게에 리뷰 추가하기 API
-app.post("/api/v1/stores/:storeId/reviews", handleCreateReview);
+        res.status(200).json({
+            resultType: "SUCCESS",
+            error: null,
+            success: {
+                message: "Google 로그인 성공!",
+                tokens: tokens, // { "accessToken": "...", "refreshToken": "..." }
+            }
+        });
+    }
+);
 
-// 1-3. 가게에 미션 추가하기 API
-app.post("/api/v1/stores/:storeId/missions", handleCreateMission);
 
-// 1-4. 가게의 미션을 도전 중인 미션에 추가하기 API (미션 도전하기)
-app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
+// 1-1. 특정 지역에 가게 추가하기 API (로그인 필요)
+app.post("/api/v1/stores", isLogin, handleCreateStore);
 
-// 회원가입
+// 1-2. 가게에 리뷰 추가하기 API (로그인 필요)
+app.post("/api/v1/stores/:storeId/reviews", isLogin, handleCreateReview);
+
+// 1-3. 가게에 미션 추가하기 API (로그인 필요)
+app.post("/api/v1/stores/:storeId/missions", isLogin, handleCreateMission);
+
+// 1-4. 가게의 미션을 도전 중인 미션에 추가하기 API (로그인 필요)
+app.post("/api/v1/missions/:missionId/challenge", isLogin, handleChallengeMission);
+
+// 회원가입 (로그인 불필요)
 app.post("/api/v1/users/signup", handleUserSignUp);
+
+// 로그인 (로그인 불필요)
+app.post("/api/v1/users/login", handleLogin);
+
+// 프로필 수정 API (로그인 필요) - Google 로그인 사용자도 추가 정보 입력 가능
+app.patch("/api/v1/users/profile", isLogin, handleUpdateProfile);
 
 /**
  * 전역 오류를 처리하기 위한 미들웨어

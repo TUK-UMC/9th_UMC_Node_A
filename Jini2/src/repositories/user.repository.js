@@ -105,3 +105,53 @@ export const getUserPreferencesByUserId = async (userId) => {
         );
     }
 };
+
+// 이메일로 사용자 조회
+export const getUserByEmail = async (email) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+        return user;
+    } catch (err) {
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+};
+
+// 사용자 정보 업데이트 (프로필 수정)
+export const updateUser = async (userId, data) => {
+    try {
+        const user = await prisma.user.update({
+            where: { userId: parseInt(userId) },
+            data: {
+                name: data.name,
+                gender: data.gender,
+                birth: data.birth,
+                address: data.address,
+                detailAddress: data.detailAddress,
+                phoneNumber: data.phoneNumber,
+                ...(data.password && { password: data.password }), // 비밀번호는 있을 때만 업데이트
+            }
+        });
+        return user.userId;
+    } catch (err) {
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+};
+
+// 사용자 선호 카테고리 삭제 (업데이트를 위해)
+export const clearUserPreferences = async (userId) => {
+    try {
+        await prisma.userFavorCategory.deleteMany({
+            where: { userId: parseInt(userId) }
+        });
+    } catch (err) {
+        throw new Error(
+            `오류가 발생했어요. 요청 파라미터를 확인해주세요. (${err})`
+        );
+    }
+};
